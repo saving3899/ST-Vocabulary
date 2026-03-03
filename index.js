@@ -2461,6 +2461,14 @@ function setupFuriganaEditDelegation() {
         popup.style.top = (rect.top + window.scrollY - 40) + 'px';
         popup.style.left = (rect.left + window.scrollX + rect.width / 2) + 'px';
 
+        // Clamp to viewport edges
+        requestAnimationFrame(function() {
+            var pr = popup.getBoundingClientRect();
+            if (pr.left < 4) popup.style.left = (4 + pr.width / 2) + 'px';
+            if (pr.right > window.innerWidth - 4) popup.style.left = (window.innerWidth - 4 - pr.width / 2 + window.scrollX) + 'px';
+            if (pr.top < 4) popup.style.top = (rect.bottom + window.scrollY + 4) + 'px';
+        });
+
         input.focus();
         input.select();
 
@@ -2542,6 +2550,15 @@ function setupTextSelection() {
         selectionTooltip.style.top = (rect.top + window.scrollY - 40) + 'px';
         selectionTooltip.style.left = (rect.left + window.scrollX + (rect.width / 2)) + 'px';
         document.body.appendChild(selectionTooltip);
+
+        // Clamp to viewport edges
+        requestAnimationFrame(function() {
+            if (!selectionTooltip) return;
+            var tr = selectionTooltip.getBoundingClientRect();
+            if (tr.left < 4) selectionTooltip.style.left = (4 + tr.width / 2) + 'px';
+            if (tr.right > window.innerWidth - 4) selectionTooltip.style.left = (window.innerWidth - 4 - tr.width / 2 + window.scrollX) + 'px';
+            if (tr.top < 4) selectionTooltip.style.top = (rect.bottom + window.scrollY + 4) + 'px';
+        });
 
         // Vocab add button
         selectionTooltip.querySelector('.stv-tooltip-vocab').addEventListener('click', async function(ev) {
@@ -2668,6 +2685,13 @@ function showFuriganaPopupMenu(btnEl, items) {
     var rect = btnEl.getBoundingClientRect();
     popup.style.top = (rect.bottom + window.scrollY + 4) + 'px';
     popup.style.left = (rect.left + window.scrollX + rect.width / 2) + 'px';
+
+    // Clamp to viewport edges
+    requestAnimationFrame(function() {
+        var pr = popup.getBoundingClientRect();
+        if (pr.left < 4) popup.style.left = (4 + pr.width / 2) + 'px';
+        if (pr.right > window.innerWidth - 4) popup.style.left = (window.innerWidth - 4 - pr.width / 2 + window.scrollX) + 'px';
+    });
 
     // Close on outside click (delayed to avoid immediate close)
     setTimeout(function() {

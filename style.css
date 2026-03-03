@@ -1427,14 +1427,329 @@
 /* ── Responsive ───────────────────────────────────── */
 
 @media (max-width: 600px) {
+    /* Panel: full-width on mobile */
     .stv-panel {
         width: 100vw;
         right: -100vw;
     }
 
+    /* Backdrop visible on mobile when panel open */
+    .stv-panel-open~.stv-backdrop,
+    .stv-backdrop.stv-backdrop-visible {
+        display: block;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.4);
+        z-index: 9999;
+    }
+
+    .stv-panel-header {
+        padding: 10px 12px;
+    }
+
+    .stv-panel-header h3 {
+        font-size: 15px;
+    }
+
+    .stv-panel-actions {
+        gap: 2px;
+    }
+
+    /* Slightly larger touch targets */
+    .stv-btn-icon {
+        width: 36px;
+        height: 36px;
+        font-size: 15px;
+    }
+
+    .stv-btn-sm {
+        width: 30px;
+        height: 30px;
+        font-size: 13px;
+    }
+
+    /* Search & filter: reduce side padding */
+    .stv-search-bar {
+        padding: 8px 12px;
+    }
+
+    .stv-search-icon {
+        left: 24px;
+    }
+
+    .stv-search-bar input {
+        padding-left: 28px !important;
+        font-size: 14px;
+    }
+
+    .stv-filter-bar {
+        padding: 0 12px 8px;
+        gap: 6px;
+    }
+
+    .stv-filter-bar select {
+        font-size: 13px;
+        padding: 6px 8px;
+    }
+
+    .stv-stats {
+        padding: 4px 12px 8px;
+    }
+
+    .stv-multi-select-actions {
+        padding: 6px 12px;
+    }
+
+    /* Word list: reduce side padding */
+    .stv-word-list {
+        padding: 0 8px 16px;
+    }
+
+    .stv-word-card {
+        padding: 10px;
+    }
+
+    .stv-word-text {
+        font-size: 16px;
+    }
+
+    /* Dialogs: near full width */
     .stv-dialog {
         width: 95vw;
         max-width: 95vw;
+        max-height: 90vh;
+        border-radius: 10px;
+    }
+
+    .stv-dialog-header {
+        padding: 12px 14px;
+    }
+
+    .stv-dialog-body {
+        padding: 12px 14px;
+    }
+
+    .stv-dialog-footer {
+        padding: 10px 14px;
+    }
+
+    /* Settings dialog */
+    .stv-settings-dialog {
+        width: 95vw;
+    }
+
+    .stv-setting-row {
+        gap: 8px;
+        font-size: 12.5px;
+    }
+
+    .stv-setting-row input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+    }
+
+    .stv-range-wrapper {
+        gap: 6px;
+    }
+
+    .stv-range-wrapper input[type="range"] {
+        width: 90px;
+    }
+
+    .stv-setting-select {
+        max-width: 150px;
+        font-size: 12px;
+    }
+
+    /* Word dialog: language selector */
+    .stv-word-row select {
+        min-width: 64px;
+        max-width: 80px;
+        padding: 8px 4px;
+    }
+
+    /* Field inputs - prevent zoom on iOS */
+    .stv-field input,
+    .stv-field select,
+    .stv-field textarea {
+        font-size: 16px;
+    }
+
+    .stv-context-input,
+    .stv-context-translation,
+    .stv-dlg-example-sentence-row input,
+    .stv-dlg-example-translation {
+        font-size: 16px;
+    }
+
+    /* Export dialog */
+    .stv-export-options {
+        gap: 6px;
+    }
+
+    .stv-export-btn {
+        padding: 10px 6px !important;
+        font-size: 12px !important;
+    }
+
+    .stv-export-btn .fa-solid {
+        font-size: 18px;
+    }
+
+    .stv-export-date-inputs {
+        gap: 6px;
+    }
+
+    .stv-export-date-inputs input[type="date"] {
+        font-size: 16px;
+        padding: 5px 6px;
+    }
+
+    /* Snackbar: stack layout on narrow screens */
+    .stv-snackbar {
+        flex-wrap: wrap;
+        padding: 10px 14px;
+        max-width: 92vw;
+        gap: 8px;
+        bottom: 16px;
+    }
+
+    .stv-snackbar-text {
+        font-size: 12.5px;
+    }
+
+    .stv-snackbar-actions {
+        width: 100%;
+        justify-content: flex-end;
+    }
+
+    .stv-snackbar-btn {
+        padding: 6px 16px;
+        font-size: 12.5px;
+    }
+
+    /* Popup menus: constrain to viewport */
+    .stv-furigana-popup {
+        max-width: 90vw;
+    }
+
+    .stv-furigana-popup-item {
+        padding: 9px 14px;
+        font-size: 13px;
+    }
+
+    .stv-furigana-edit-popup {
+        max-width: 90vw;
+    }
+
+    .stv-furigana-edit-popup input {
+        width: 80px;
+        font-size: 16px;
+    }
+
+    /* Selection tooltip */
+    .stv-selection-tooltip {
+        max-width: 90vw;
+    }
+
+    .stv-tooltip-btn {
+        padding: 6px 10px;
+        font-size: 11px;
+    }
+
+    /* Word info dialog */
+    .stv-info-dialog {
+        width: 95vw;
+    }
+
+    .stv-info-word {
+        font-size: 20px;
+    }
+
+    .stv-info-meaning {
+        font-size: 14px;
+    }
+
+    /* Example entries: tighter spacing */
+    .stv-dlg-examples-list {
+        gap: 6px;
+    }
+
+    .stv-dlg-example-entry {
+        padding: 6px;
+    }
+
+    /* Analyze / examples buttons */
+    .stv-btn-analyze,
+    .stv-btn-add-examples {
+        padding: 10px 12px;
+        font-size: 12.5px;
+    }
+}
+
+/* Extra small screens (phones in portrait) */
+@media (max-width: 380px) {
+    .stv-panel-header h3 {
+        font-size: 14px;
+    }
+
+    .stv-setting-row {
+        flex-wrap: wrap;
+        gap: 4px;
+    }
+
+    .stv-setting-row label {
+        width: 100%;
+    }
+
+    .stv-range-wrapper {
+        width: 100%;
+        justify-content: flex-end;
+    }
+
+    .stv-range-wrapper input[type="range"] {
+        width: 70px;
+    }
+
+    .stv-export-options {
+        flex-direction: column;
+    }
+
+    .stv-export-btn {
+        flex-direction: row;
+        padding: 10px 12px !important;
+    }
+
+    .stv-export-btn .fa-solid {
+        font-size: 16px;
+    }
+
+    .stv-dialog-btn-row {
+        flex-direction: column;
+    }
+
+    .stv-dialog-btn-row .stv-btn {
+        width: 100%;
+    }
+
+    .stv-tooltip-btn {
+        padding: 5px 8px;
+        font-size: 10.5px;
+        gap: 4px;
+    }
+
+    .stv-info-word-header {
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+
+    .stv-info-word {
+        font-size: 18px;
+    }
+
+    .stv-snackbar {
+        font-size: 12px;
+        padding: 8px 12px;
     }
 }
 
