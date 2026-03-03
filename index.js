@@ -2046,9 +2046,11 @@ function showWordInfoDialog(wordId) {
         + '<div class="stv-info-meta"><span class="stv-date">추가일: ' + formatDate(w.addedAt) + '</span></div>'
         + '</div>'
         + '<div class="stv-dialog-footer">'
+        + '<button class="stv-btn stv-btn-delete" id="stv-info-delete"><span class="fa-solid fa-trash-can"></span> 삭제</button>'
+        + '<div class="stv-dialog-footer-right">'
         + '<button class="stv-btn stv-btn-cancel" id="stv-info-close">닫기</button>'
         + '<button class="stv-btn stv-btn-edit" id="stv-info-edit"><span class="fa-solid fa-pen"></span> 수정</button>'
-        + '</div></div>';
+        + '</div></div></div>';
     document.body.appendChild(overlay);
 
     var closeInfo = function() { overlay.remove(); };
@@ -2058,6 +2060,14 @@ function showWordInfoDialog(wordId) {
     document.getElementById('stv-info-edit').addEventListener('click', function() {
         closeInfo();
         showWordDialog(wordId);
+    });
+    document.getElementById('stv-info-delete').addEventListener('click', function() {
+        if (!confirm('"' + w.word + '" 단어를 삭제하시겠습니까?')) return;
+        removeVocabWord(wordId);
+        closeInfo();
+        toastr.info('"' + w.word + '" 삭제됨');
+        renderVocabList();
+        setTimeout(function() { refreshVocabHighlightsInChat(); }, 100);
     });
 
     // Base form button click handler
@@ -2185,7 +2195,6 @@ async function showWordDialog(editId, opts) {
     var closeDialog = function() { overlay.remove(); };
     overlay.querySelector('.stv-dialog-close').addEventListener('click', closeDialog);
     overlay.querySelector('.stv-btn-cancel').addEventListener('click', closeDialog);
-    overlay.addEventListener('click', function(e) { if (e.target === overlay) closeDialog(); });
 
     // Populate existing examples
     var examplesList = document.getElementById('stv-dlg-examples-list');
@@ -2474,6 +2483,7 @@ function setupFuriganaEditDelegation() {
         // Create edit popup
         var popup = document.createElement('div');
         popup.className = 'stv-furigana-edit-popup';
+        popup.id = 'stv-furigana-edit-popup';
         var input = document.createElement('input');
         input.type = 'text';
         input.value = currentReading;
@@ -3216,13 +3226,13 @@ function showSettingsModal() {
         + '<div class="stv-setting-row"><label>하이라이트 색상</label>'
         + '<div class="stv-range-wrapper">'
         + '<input type="color" id="stv-set-vocab-color" value="' + (s.vocabHighlightColor || '#6495ED') + '" style="width:36px;height:28px;padding:1px;border:1px solid var(--SmartThemeBorderColor,#444);border-radius:4px;background:transparent;cursor:pointer;" />'
-        + '<span style="font-size:12px;color:var(--SmartThemeQuoteColor,#aaa);">단어</span></div></div>'
+        + '<span style="font-size:12px !important;color:var(--SmartThemeQuoteColor,#aaa);">단어</span></div></div>'
         + '<div class="stv-setting-row"><label>호버 시 단어 하이라이트</label>'
         + '<input type="checkbox" id="stv-set-hover"' + (s.furiganaHover ? ' checked' : '') + ' /></div>'
         + '<div class="stv-setting-row"><label>호버 색상</label>'
         + '<div class="stv-range-wrapper">'
         + '<input type="color" id="stv-set-vocab-hover-color" value="' + (s.vocabHoverColor || '#6495ED') + '" style="width:36px;height:28px;padding:1px;border:1px solid var(--SmartThemeBorderColor,#444);border-radius:4px;background:transparent;cursor:pointer;" />'
-        + '<span style="font-size:12px;color:var(--SmartThemeQuoteColor,#aaa);">호버</span></div></div></div>'
+        + '<span style="font-size:12px !important;color:var(--SmartThemeQuoteColor,#aaa);">호버</span></div></div></div>'
 
         // ── Section 4: API 설정 ──
         + '<div class="stv-settings-section"><h4>API 설정</h4>'

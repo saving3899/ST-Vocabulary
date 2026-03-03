@@ -402,7 +402,7 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    margin-top: 8px;
+    margin-top: 4px;
 }
 
 /* Badges */
@@ -458,8 +458,9 @@
 }
 
 .stv-date {
-    font-size: 11px;
+    font-size: 10px;
     color: var(--SmartThemeQuoteColor, #666);
+    opacity: 0.7;
 }
 
 /* ── Buttons ──────────────────────────────────────── */
@@ -659,6 +660,33 @@
     gap: 8px;
     padding: 12px 18px;
     border-top: 1px solid var(--SmartThemeBorderColor, #333);
+}
+
+.stv-dialog-footer-right {
+    display: flex;
+    gap: 8px;
+    margin-left: auto;
+}
+
+.stv-btn-delete {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 7px 14px;
+    border: 1px solid rgba(231, 76, 60, 0.4);
+    border-radius: 8px;
+    background: rgba(231, 76, 60, 0.1);
+    color: #e74c3c;
+    font-size: 12.5px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.2s, border-color 0.2s;
+    margin-right: auto;
+}
+
+.stv-btn-delete:hover {
+    background: rgba(231, 76, 60, 0.25);
+    border-color: rgba(231, 76, 60, 0.6);
 }
 
 .stv-field {
@@ -1961,6 +1989,245 @@
 }
 
 /* ══════════════════════════════════════════════════════
+   SillyTavern Font Manager Override
+   ──────────────────────────────────────────────────────
+   SillyTavern's font-manager sets font-family / font-size /
+   font-weight / line-height on  span, input, select, textarea
+   via   html body span:not(…)×11 { … !important }
+   (specificity ≈ 0,11,3).
+   We use ID selectors (specificity 1,x,x) which always beat
+   class-only selectors, then re-assert our intended values.
+   ══════════════════════════════════════════════════════ */
+
+/* ── Reset: neutralise forced font properties ──────── */
+#stv-panel span:not([class*="fa"]),
+#stv-info-overlay span:not([class*="fa"]),
+#stv-dialog-overlay span:not([class*="fa"]),
+#stv-settings-overlay span:not([class*="fa"]),
+#stv-export-overlay span:not([class*="fa"]),
+#stv-snackbar span:not([class*="fa"]),
+#stv-furigana-progress span:not([class*="fa"]) {
+    font-family: inherit !important;
+    font-size: inherit !important;
+    font-weight: inherit !important;
+    line-height: inherit !important;
+}
+
+#stv-panel input, #stv-panel select, #stv-panel textarea,
+#stv-dialog-overlay input, #stv-dialog-overlay select, #stv-dialog-overlay textarea,
+#stv-settings-overlay input, #stv-settings-overlay select,
+#stv-export-overlay input, #stv-export-overlay select,
+#stv-furigana-edit-popup input {
+    font-family: inherit !important;
+    font-size: inherit !important;
+    font-weight: inherit !important;
+    line-height: inherit !important;
+    color: inherit !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+    outline: none !important;
+}
+
+/* ── Reset: neutralise forced icon properties ──────── */
+#stv-panel .fa-solid, #stv-panel .fas, #stv-panel .far, #stv-panel .fab,
+#stv-info-overlay .fa-solid, #stv-info-overlay .fas,
+#stv-dialog-overlay .fa-solid, #stv-dialog-overlay .fas,
+#stv-settings-overlay .fa-solid, #stv-settings-overlay .fas,
+#stv-export-overlay .fa-solid, #stv-export-overlay .fas,
+#stv-snackbar .fa-solid, #stv-snackbar .fas,
+#stv-furigana-progress .fa-solid, #stv-furigana-progress .fas,
+#stv-furigana-edit-popup .fa-solid {
+    color: inherit !important;
+    font-size: inherit !important;
+    text-shadow: none !important;
+    transition: none !important;
+}
+
+/* Icons in unparented containers (class-only, still > 0,1,0) */
+.stv-furigana-popup .fa-solid,
+.stv-selection-tooltip .fa-solid {
+    color: inherit !important;
+    font-size: inherit !important;
+    text-shadow: none !important;
+    transition: none !important;
+}
+
+/* ── Re-assert: specific icon overrides ────────────── */
+#stv-export-overlay .stv-export-btn .fa-solid { font-size: 20px !important; }
+.stv-furigana-popup-item .fa-trash              { color: #e74c3c !important; }
+.stv-furigana-popup-item:hover .fa-trash         { color: #e74c3c !important; }
+
+/* ── Re-assert: vocab panel spans ──────────────────── */
+#stv-panel span.stv-search-icon            { font-size: 12px !important; }
+#stv-panel span.stv-select-count           { font-size: 12px !important; font-weight: 500  !important; }
+#stv-panel span.stv-word-text              { font-size: 18px !important; font-weight: bold !important; }
+#stv-panel span.stv-word-reading           { font-size: 13px !important; }
+
+/* Badges & date — shared between panel and info dialog */
+#stv-panel span.stv-pos-badge,
+#stv-info-overlay span.stv-pos-badge       { font-size: 11px !important; font-weight: 500  !important; }
+
+#stv-panel span.stv-lang-badge,
+#stv-info-overlay span.stv-lang-badge      { font-size: 10px !important; }
+
+#stv-panel span.stv-grammar-badge,
+#stv-info-overlay span.stv-grammar-badge   { font-size: 10px !important; font-weight: 500  !important; }
+
+#stv-panel span.stv-date,
+#stv-info-overlay span.stv-date            { font-size: 10px !important; }
+
+/* ── Re-assert: info dialog spans ──────────────────── */
+#stv-info-overlay span.stv-info-word       { font-size: 24px !important; font-weight: 700  !important; }
+#stv-info-overlay span.stv-info-reading    { font-size: 15px !important; }
+#stv-info-overlay span.stv-baseform-label  { font-size: 11px !important; }
+#stv-info-overlay span.stv-info-ex-num     { font-weight: 600 !important; }
+#stv-info-overlay span.stv-wordforms-group-label { font-size: 11px !important; font-weight: 600 !important; }
+#stv-info-overlay span.stv-wordform-label  { font-size: 11px !important; }
+#stv-info-overlay span.stv-wordform-word   { font-weight: 500 !important; }
+#stv-info-overlay span.stv-wordform-check  { font-size: 9px  !important; }
+
+/* ── Re-assert: snackbar spans ─────────────────────── */
+#stv-snackbar span.stv-snackbar-text,
+#stv-furigana-progress span.stv-snackbar-text { line-height: 1.4 !important; }
+
+/* ── Re-assert: export dialog spans ────────────────── */
+#stv-export-overlay span.stv-export-date-sep { font-size: 13px !important; }
+
+/* ── Re-assert: settings dialog spans ──────────────── */
+#stv-settings-overlay .stv-range-wrapper span { font-size: 12px !important; }
+#stv-settings-overlay span.stv-stats-lang-badge { font-size: 11.5px !important; }
+
+/* ── Re-assert: input / select / textarea sizes ────── */
+#stv-panel .stv-search-bar input                           { font-size: 13px   !important; }
+#stv-panel .stv-filter-bar select                          { font-size: 12px   !important; }
+#stv-dialog-overlay .stv-word-row select                   { font-size: 13px   !important; }
+#stv-dialog-overlay .stv-field input,
+#stv-dialog-overlay .stv-field select,
+#stv-dialog-overlay .stv-field textarea                    { font-size: 14px   !important; }
+#stv-dialog-overlay .stv-context-input                     { font-size: 13px   !important; }
+#stv-dialog-overlay .stv-context-translation               { font-size: 12px   !important; }
+#stv-dialog-overlay .stv-dlg-example-sentence-row input    { font-size: 13px   !important; }
+#stv-dialog-overlay .stv-dlg-example-translation           { font-size: 12px   !important; }
+#stv-export-overlay .stv-export-date-inputs input[type="date"] { font-size: 12.5px !important; }
+#stv-settings-overlay select.stv-setting-select            { font-size: 12px   !important; }
+#stv-furigana-edit-popup input                             { font-size: 13px   !important; }
+
+/* ── Re-assert: input / select / textarea visual properties ── */
+#stv-panel .stv-search-bar input {
+    padding: 8px 12px 8px 32px !important;
+    border-radius: 8px !important;
+    border: 1px solid var(--SmartThemeBorderColor, #444) !important;
+    background: var(--SmartThemeBlurTintColor, #0d0d1a) !important;
+    color: var(--SmartThemeBodyColor, #eee) !important;
+}
+
+#stv-panel .stv-filter-bar select {
+    padding: 5px 8px !important;
+    border-radius: 6px !important;
+    border: 1px solid var(--SmartThemeBorderColor, #444) !important;
+    background: var(--SmartThemeBlurTintColor, #0d0d1a) !important;
+    color: var(--SmartThemeBodyColor, #eee) !important;
+}
+
+#stv-dialog-overlay .stv-field input,
+#stv-dialog-overlay .stv-field select,
+#stv-dialog-overlay .stv-field textarea {
+    padding: 8px 10px !important;
+    border-radius: 6px !important;
+    border: 1px solid var(--SmartThemeBorderColor, #444) !important;
+    background: var(--SmartThemeBlurTintColor, rgba(0, 0, 0, 0.2)) !important;
+    color: var(--SmartThemeBodyColor, #eee) !important;
+}
+
+#stv-dialog-overlay .stv-word-row select {
+    padding: 8px 6px !important;
+}
+
+#stv-dialog-overlay .stv-context-input {
+    padding: 6px 10px !important;
+    border-radius: 6px !important;
+    border: 1px solid rgba(100, 149, 237, 0.25) !important;
+    background: var(--SmartThemeBlurTintColor, rgba(0, 0, 0, 0.2)) !important;
+    color: var(--SmartThemeBodyColor, #eee) !important;
+}
+
+#stv-dialog-overlay .stv-context-translation {
+    padding: 5px 10px !important;
+    border-radius: 6px !important;
+    border: 1px solid var(--SmartThemeBorderColor, #333) !important;
+    background: transparent !important;
+    color: var(--SmartThemeQuoteColor, #aaa) !important;
+}
+
+#stv-dialog-overlay .stv-dlg-example-sentence-row input {
+    padding: 5px 8px !important;
+    border-radius: 4px !important;
+    border: 1px solid var(--SmartThemeBorderColor, #444) !important;
+    background: transparent !important;
+    color: var(--SmartThemeBodyColor, #eee) !important;
+}
+
+#stv-dialog-overlay .stv-dlg-example-translation {
+    padding: 4px 8px !important;
+    border-radius: 4px !important;
+    border: 1px solid var(--SmartThemeBorderColor, #333) !important;
+    background: transparent !important;
+    color: var(--SmartThemeQuoteColor, #aaa) !important;
+}
+
+#stv-furigana-edit-popup input {
+    padding: 4px 8px !important;
+    border-radius: 6px !important;
+    border: 1px solid var(--SmartThemeBorderColor, #444) !important;
+    background: var(--SmartThemeQuoteColor, rgba(255, 255, 255, 0.05)) !important;
+    color: var(--SmartThemeBodyColor, #eee) !important;
+}
+
+#stv-export-overlay .stv-export-date-inputs input[type="date"] {
+    padding: 5px 8px !important;
+    border-radius: 6px !important;
+    border: 1px solid var(--SmartThemeBorderColor, #444) !important;
+    background: var(--SmartThemeBlurTintColor, rgba(255, 255, 255, 0.05)) !important;
+    color: var(--SmartThemeBodyColor, #ccc) !important;
+}
+
+#stv-settings-overlay select.stv-setting-select {
+    padding: 4px 8px !important;
+    border-radius: 6px !important;
+    border: 1px solid var(--SmartThemeBorderColor, #444) !important;
+    background: var(--SmartThemeBlurTintColor, rgba(0, 0, 0, 0.2)) !important;
+    color: var(--SmartThemeBodyColor, #eee) !important;
+}
+
+/* ── Responsive font overrides (ID-prefixed) ───────── */
+@media (max-width: 600px) {
+    #stv-panel span.stv-word-text                          { font-size: 16px   !important; }
+    #stv-panel .stv-search-bar input                       { font-size: 14px   !important; }
+    #stv-panel .stv-filter-bar select                      { font-size: 13px   !important; }
+    #stv-dialog-overlay .stv-field input,
+    #stv-dialog-overlay .stv-field select,
+    #stv-dialog-overlay .stv-field textarea                { font-size: 16px   !important; }
+    #stv-dialog-overlay .stv-context-input,
+    #stv-dialog-overlay .stv-context-translation,
+    #stv-dialog-overlay .stv-dlg-example-sentence-row input,
+    #stv-dialog-overlay .stv-dlg-example-translation       { font-size: 16px   !important; }
+    #stv-export-overlay .stv-export-date-inputs input[type="date"] { font-size: 16px !important; }
+    #stv-settings-overlay select.stv-setting-select        { font-size: 12px   !important; }
+    #stv-furigana-edit-popup input                         { font-size: 16px   !important; }
+    #stv-snackbar span.stv-snackbar-text,
+    #stv-furigana-progress span.stv-snackbar-text          { font-size: 12.5px !important; }
+    #stv-info-overlay span.stv-info-word                   { font-size: 20px   !important; }
+
+    /* Responsive icon overrides */
+    #stv-export-overlay .stv-export-btn .fa-solid           { font-size: 18px  !important; }
+}
+
+@media (max-width: 380px) {
+    #stv-info-overlay span.stv-info-word                   { font-size: 18px   !important; }
+    #stv-export-overlay .stv-export-btn .fa-solid           { font-size: 16px  !important; }
+}
+
+/* ══════════════════════════════════════════════════════
    THEME: Light Mode Overrides
    ══════════════════════════════════════════════════════ */
 
@@ -1979,19 +2246,19 @@ body.stv-theme-light .stv-panel-header h3 {
 }
 
 body.stv-theme-light .stv-search-bar input {
-    background: #f5f5f5;
-    color: #333;
-    border-color: #ddd;
+    background: #f5f5f5 !important;
+    color: #333 !important;
+    border-color: #ddd !important;
 }
 
 body.stv-theme-light .stv-search-bar input:focus {
-    border-color: #aaa;
+    border-color: #aaa !important;
 }
 
 body.stv-theme-light .stv-filter-bar select {
-    background: #f5f5f5;
-    color: #333;
-    border-color: #ddd;
+    background: #f5f5f5 !important;
+    color: #333 !important;
+    border-color: #ddd !important;
 }
 
 body.stv-theme-light .stv-word-card {
@@ -2076,32 +2343,32 @@ body.stv-theme-light .stv-field label {
 body.stv-theme-light .stv-field input,
 body.stv-theme-light .stv-field select,
 body.stv-theme-light .stv-field textarea {
-    background: #f5f5f5;
-    color: #333;
-    border-color: #ddd;
+    background: #f5f5f5 !important;
+    color: #333 !important;
+    border-color: #ddd !important;
 }
 
 body.stv-theme-light .stv-field input:focus,
 body.stv-theme-light .stv-field select:focus,
 body.stv-theme-light .stv-field textarea:focus {
-    border-color: cornflowerblue;
+    border-color: cornflowerblue !important;
 }
 
 body.stv-theme-light .stv-context-textarea {
-    background: #f5f5f5;
-    color: #333;
-    border-color: rgba(100, 149, 237, 0.2);
+    background: #f5f5f5 !important;
+    color: #333 !important;
+    border-color: rgba(100, 149, 237, 0.2) !important;
 }
 
 body.stv-theme-light .stv-context-input {
-    background: #f5f5f5;
-    color: #333;
-    border-color: rgba(100, 149, 237, 0.2);
+    background: #f5f5f5 !important;
+    color: #333 !important;
+    border-color: rgba(100, 149, 237, 0.2) !important;
 }
 
 body.stv-theme-light .stv-context-translation {
-    border-color: #ddd;
-    color: #777;
+    border-color: #ddd !important;
+    color: #777 !important;
 }
 
 body.stv-theme-light .stv-context-field {
@@ -2115,13 +2382,13 @@ body.stv-theme-light .stv-dlg-example-entry {
 }
 
 body.stv-theme-light .stv-dlg-example-sentence-row input {
-    color: #333;
-    border-color: #ddd;
+    color: #333 !important;
+    border-color: #ddd !important;
 }
 
 body.stv-theme-light .stv-dlg-example-translation {
-    border-color: #ddd;
-    color: #777;
+    border-color: #ddd !important;
+    color: #777 !important;
 }
 
 body.stv-theme-light .stv-dlg-example-remove:hover {
@@ -2180,9 +2447,9 @@ body.stv-theme-light .stv-settings-section h4 {
 }
 
 body.stv-theme-light .stv-setting-select {
-    background: #f5f5f5;
-    color: #333;
-    border-color: #ddd;
+    background: #f5f5f5 !important;
+    color: #333 !important;
+    border-color: #ddd !important;
 }
 
 body.stv-theme-light .stv-context-hint {
@@ -2227,9 +2494,9 @@ body.stv-theme-light .stv-furigana-edit-popup {
 }
 
 body.stv-theme-light .stv-furigana-edit-popup input {
-    background: #f8f9fa;
-    border-color: #ccc;
-    color: #333;
+    background: #f8f9fa !important;
+    border-color: #ccc !important;
+    color: #333 !important;
 }
 
 body.stv-theme-light .stv-snackbar {
@@ -2352,39 +2619,39 @@ body.stv-theme-dark .stv-dialog-footer {
 body.stv-theme-dark .stv-field input,
 body.stv-theme-dark .stv-field select,
 body.stv-theme-dark .stv-field textarea {
-    background: rgba(255, 255, 255, 0.04);
-    border-color: #333;
-    color: #e0e0e0;
+    background: rgba(255, 255, 255, 0.04) !important;
+    border-color: #333 !important;
+    color: #e0e0e0 !important;
 }
 
 body.stv-theme-dark .stv-field input:focus,
 body.stv-theme-dark .stv-field select:focus,
 body.stv-theme-dark .stv-field textarea:focus {
-    border-color: cornflowerblue;
+    border-color: cornflowerblue !important;
 }
 
 body.stv-theme-dark .stv-context-textarea {
-    background: rgba(255, 255, 255, 0.04);
-    border-color: rgba(100, 149, 237, 0.2);
-    color: #e0e0e0;
+    background: rgba(255, 255, 255, 0.04) !important;
+    border-color: rgba(100, 149, 237, 0.2) !important;
+    color: #e0e0e0 !important;
 }
 
 body.stv-theme-dark .stv-search-bar input {
-    background: rgba(255, 255, 255, 0.04);
-    border-color: #333;
-    color: #e0e0e0;
+    background: rgba(255, 255, 255, 0.04) !important;
+    border-color: #333 !important;
+    color: #e0e0e0 !important;
 }
 
 body.stv-theme-dark .stv-filter-bar select {
-    background: rgba(255, 255, 255, 0.04);
-    border-color: #333;
-    color: #e0e0e0;
+    background: rgba(255, 255, 255, 0.04) !important;
+    border-color: #333 !important;
+    color: #e0e0e0 !important;
 }
 
 body.stv-theme-dark .stv-setting-select {
-    background: rgba(255, 255, 255, 0.04);
-    border-color: #333;
-    color: #e0e0e0;
+    background: rgba(255, 255, 255, 0.04) !important;
+    border-color: #333 !important;
+    color: #e0e0e0 !important;
 }
 
 body.stv-theme-dark .stv-settings-section {
@@ -2430,7 +2697,7 @@ body.stv-theme-dark .stv-furigana-edit-popup {
 }
 
 body.stv-theme-dark .stv-furigana-edit-popup input {
-    background: rgba(255, 255, 255, 0.06);
-    border-color: #444;
-    color: #e0e0e0;
+    background: rgba(255, 255, 255, 0.06) !important;
+    border-color: #444 !important;
+    color: #e0e0e0 !important;
 }
