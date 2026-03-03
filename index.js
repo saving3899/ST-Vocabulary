@@ -117,6 +117,7 @@ function showFuriganaProgressSnackbar(mesId, label) {
     var snackbar = document.createElement('div');
     snackbar.id = 'stv-furigana-progress';
     snackbar.className = 'stv-snackbar stv-furigana-progress';
+    snackbar.setAttribute('popover', 'manual');
     snackbar.innerHTML = '<span class="stv-snackbar-text">'
         + '<span class="fa-solid fa-language stv-furigana-progress-spin"></span> '
         + (label || '후리가나 생성 중...')
@@ -125,7 +126,13 @@ function showFuriganaProgressSnackbar(mesId, label) {
         + '<button class="stv-snackbar-btn stv-snackbar-stop"><span class="fa-solid fa-stop"></span> 중지</button>'
         + '</div>';
     document.body.appendChild(snackbar);
-    setTimeout(function() { snackbar.classList.add('stv-snackbar-show'); }, 30);
+    snackbar.showPopover();
+    // Double rAF ensures the initial hidden state is painted before showing
+    requestAnimationFrame(function() {
+        requestAnimationFrame(function() {
+            snackbar.classList.add('stv-snackbar-show');
+        });
+    });
 
     snackbar.querySelector('.stv-snackbar-stop').addEventListener('click', function() {
         var ctrl = furiganaAbortControllers.get(String(mesId));
@@ -145,7 +152,10 @@ function hideFuriganaProgressSnackbar() {
     if (el) {
         el.classList.remove('stv-snackbar-show');
         el.classList.add('stv-snackbar-hide');
-        setTimeout(function() { el.remove(); }, 300);
+        setTimeout(function() {
+            try { el.hidePopover(); } catch(e) {}
+            el.remove();
+        }, 300);
     }
 }
 
@@ -1263,7 +1273,10 @@ async function detectBaseForm(word, langOverride) {
 function showBaseFormSnackbar(originalWord, baseForm) {
     // Remove any existing snackbar
     var old = document.getElementById('stv-snackbar');
-    if (old) old.remove();
+    if (old) {
+        try { old.hidePopover(); } catch(e) {}
+        old.remove();
+    }
 
     var existing = getVocab().find(function(w) { return w.word === baseForm; });
     if (existing) return; // base form already in vocab
@@ -1271,6 +1284,7 @@ function showBaseFormSnackbar(originalWord, baseForm) {
     var snackbar = document.createElement('div');
     snackbar.id = 'stv-snackbar';
     snackbar.className = 'stv-snackbar';
+    snackbar.setAttribute('popover', 'manual');
     snackbar.innerHTML = '<span class="stv-snackbar-text">'
         + '<span class="fa-solid fa-lightbulb stv-snackbar-icon"></span> '
         + '"<b>' + escapeHtml(originalWord) + '</b>"의 원형 "<b>' + escapeHtml(baseForm) + '</b>"도 추가할까요?'
@@ -1280,10 +1294,13 @@ function showBaseFormSnackbar(originalWord, baseForm) {
         + '<button class="stv-snackbar-btn stv-snackbar-no">닫기</button>'
         + '</div>';
     document.body.appendChild(snackbar);
-    // Use setTimeout to ensure the initial state is rendered before triggering transition
-    setTimeout(function() {
-        snackbar.classList.add('stv-snackbar-show');
-    }, 50);
+    snackbar.showPopover();
+    // Double rAF ensures the initial hidden state is painted before showing
+    requestAnimationFrame(function() {
+        requestAnimationFrame(function() {
+            snackbar.classList.add('stv-snackbar-show');
+        });
+    });
 
     var autoHide = setTimeout(function() { dismissSnackbar(); }, 15000);
 
@@ -1291,7 +1308,10 @@ function showBaseFormSnackbar(originalWord, baseForm) {
         clearTimeout(autoHide);
         snackbar.classList.remove('stv-snackbar-show');
         snackbar.classList.add('stv-snackbar-hide');
-        setTimeout(function() { snackbar.remove(); }, 300);
+        setTimeout(function() {
+            try { snackbar.hidePopover(); } catch(e) {}
+            snackbar.remove();
+        }, 300);
     }
 
     snackbar.querySelector('.stv-snackbar-no').addEventListener('click', function() {

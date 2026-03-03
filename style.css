@@ -329,7 +329,7 @@
 
 .stv-word-card-header {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     justify-content: space-between;
     margin-bottom: 6px;
 }
@@ -1466,12 +1466,16 @@
 /* ── Snackbar (Base Form Suggestion) ──────────────── */
 
 .stv-snackbar {
-    position: fixed;
-    bottom: calc(24px + env(safe-area-inset-bottom, 0px));
-    left: 50%;
-    transform: translateX(-50%) translateY(100px);
-    z-index: 10003;
-    display: flex;
+    position: fixed !important;
+    top: auto !important;
+    bottom: calc(24px + env(safe-area-inset-bottom, 0px)) !important;
+    left: 0 !important;
+    right: 0 !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    width: fit-content;
+    z-index: 10003 !important;
+    display: flex !important;
     align-items: center;
     gap: 12px;
     padding: 10px 16px;
@@ -1479,25 +1483,28 @@
     border: 1px solid var(--SmartThemeBorderColor, #444);
     background: var(--SmartThemeBlurTintColor, #1e1e2e);
     color: var(--SmartThemeBodyColor, #eee);
+    font-family: var(--mainFontFamily, 'Noto Sans', sans-serif);
     font-size: 13px;
     box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5);
     opacity: 0;
-    -webkit-transition: transform 0.3s ease, opacity 0.3s ease;
-    transition: transform 0.3s ease, opacity 0.3s ease;
+    visibility: hidden;
+    overflow: visible;
+    -webkit-transition: opacity 0.3s ease, visibility 0.3s ease;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
     max-width: 90vw;
-    -webkit-transform: translateX(-50%) translateY(100px);
+    pointer-events: none;
 }
 
 .stv-snackbar-show {
-    -webkit-transform: translateX(-50%) translateY(0);
-    transform: translateX(-50%) translateY(0);
-    opacity: 1;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
 }
 
 .stv-snackbar-hide {
-    -webkit-transform: translateX(-50%) translateY(100px);
-    transform: translateX(-50%) translateY(100px);
-    opacity: 0;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
 }
 
 .stv-snackbar-icon {
@@ -1758,7 +1765,7 @@
         padding: 10px 14px;
         max-width: 92vw;
         gap: 8px;
-        bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+        bottom: calc(16px + env(safe-area-inset-bottom, 0px)) !important;
     }
 
     .stv-snackbar-text {
@@ -1809,8 +1816,17 @@
         width: 95vw;
     }
 
+    .stv-info-word-header {
+        margin-bottom: 8px;
+        gap: 8px;
+    }
+
     .stv-info-word {
         font-size: 20px;
+    }
+
+    .stv-info-badges {
+        margin-bottom: 10px;
     }
 
     .stv-info-meaning {
@@ -1888,6 +1904,7 @@
     .stv-info-word-header {
         flex-wrap: wrap;
         gap: 6px;
+        margin-bottom: 8px;
     }
 
     .stv-info-word {
