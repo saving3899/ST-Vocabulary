@@ -186,6 +186,20 @@ function formatDate(iso) {
     return d.getFullYear() + '.' + String(d.getMonth() + 1).padStart(2, '0') + '.' + String(d.getDate()).padStart(2, '0');
 }
 
+/** Convert katakana characters in a string to hiragana. */
+function katakanaToHiragana(str) {
+    if (!str) return str;
+    return str.replace(/[\u30A1-\u30F6]/g, function(ch) {
+        return String.fromCharCode(ch.charCodeAt(0) - 0x60);
+    });
+}
+
+/** Normalize reading to hiragana if the word language is Japanese. */
+function normalizeReading(reading, language) {
+    if (language === 'ja' && reading) return katakanaToHiragana(reading);
+    return reading;
+}
+
 function detectLanguage(word, reading) {
     if (!word) return 'unknown';
     // Check for Japanese kana first (hiragana/katakana) — if present, it's Japanese
@@ -1009,17 +1023,18 @@ function getVocab() {
 
 function addVocabWord(data) {
     var settings = getSettings();
+    var lang = data.language || detectLanguage(data.word, data.reading);
     var word = {
         id: uid(),
         word: data.word || '',
-        reading: data.reading || '',
+        reading: normalizeReading(data.reading || '', lang),
         meaning: data.meaning || '',
         partOfSpeech: data.partOfSpeech || '',
         grammarInfo: data.grammarInfo || '',
         baseForm: data.baseForm || null,
         examples: data.examples || [],
         wordForms: data.wordForms || null,
-        language: data.language || detectLanguage(data.word, data.reading),
+        language: lang,
         addedAt: new Date().toISOString(),
         source: data.source || 'manual',
     };
@@ -1033,6 +1048,11 @@ function updateVocabWord(id, updates) {
     var settings = getSettings();
     var idx = settings.vocabList.findIndex(function(w) { return w.id === id; });
     if (idx === -1) return null;
+    // Normalize reading for Japanese words
+    if (updates.reading !== undefined) {
+        var lang = updates.language || settings.vocabList[idx].language;
+        updates.reading = normalizeReading(updates.reading, lang);
+    }
     Object.assign(settings.vocabList[idx], updates);
     saveSettings();
     renderVocabList();
@@ -1320,7 +1340,7 @@ function showExportDialog(vocab) {
     var overlay = document.createElement('div');
     overlay.id = 'stv-export-overlay';
     overlay.className = 'stv-dialog-overlay';
-    overlay.innerHTML = '<div class="stv-dialog" style="width:380px;">'
+    overlay.innerHTML = '<div class="stv-dialog stv-export-dialog">'
         + '<div class="stv-dialog-header"><h3>내보내기</h3>'
         + '<button class="stv-btn stv-btn-icon stv-dialog-close"><span class="fa-solid fa-xmark"></span></button></div>'
         + '<div class="stv-dialog-body">'
@@ -1347,6 +1367,7 @@ function showExportDialog(vocab) {
 
     var closeExport = function() { overlay.remove(); };
     overlay.querySelector('.stv-dialog-close').addEventListener('click', closeExport);
+    overlay.addEventListener('click', function(e) { if (e.target === overlay) closeExport(); });
 
     // Helpers
     function getFilteredVocab() {
@@ -1686,7 +1707,11 @@ function createVocabPanel() {
         renderVocabList();
         setTimeout(function() { refreshVocabHighlightsInChat(); }, 100);
     });
-    // backdrop removed — panel is non-blocking
+    // backdrop click to close panel on mobile
+    backdrop.addEventListener('click', function() {
+        exitMultiSelectMode();
+        toggleVocabPanel();
+    });
 }
 
 function exitMultiSelectMode() {
@@ -2160,6 +2185,7 @@ async function showWordDialog(editId, opts) {
     var closeDialog = function() { overlay.remove(); };
     overlay.querySelector('.stv-dialog-close').addEventListener('click', closeDialog);
     overlay.querySelector('.stv-btn-cancel').addEventListener('click', closeDialog);
+    overlay.addEventListener('click', function(e) { if (e.target === overlay) closeDialog(); });
 
     // Populate existing examples
     var examplesList = document.getElementById('stv-dlg-examples-list');
@@ -2210,7 +2236,9 @@ async function showWordDialog(editId, opts) {
             detectBaseForm(wordVal, selectedLang),
         ]);
         if (result) {
-            if (result.reading) document.getElementById('stv-dlg-reading').value = result.reading;
+            // Determine effective language for reading normalization
+            var effectiveLang = (selectedLang !== 'auto') ? selectedLang : detectLanguage(wordVal, result.reading);
+            if (result.reading) document.getElementById('stv-dlg-reading').value = normalizeReading(result.reading, effectiveLang);
             if (result.meaning) document.getElementById('stv-dlg-meaning').value = result.meaning;
             if (result.partOfSpeech) {
                 var normalized = normalizePartOfSpeech(result.partOfSpeech);
@@ -2527,11 +2555,13 @@ function setupTextSelection() {
         if (selectionTooltip) { selectionTooltip.remove(); selectionTooltip = null; }
     }
 
-    document.addEventListener('mouseup', function(e) {
+    function showTooltipForSelection(e) {
         if (selectionTooltip && selectionTooltip.contains(e.target)) return;
         var chatEl = document.getElementById('chat');
         if (!chatEl || !chatEl.contains(e.target)) { removeTooltip(); return; }
 
+        // Small delay for mobile to let selection finalize
+        setTimeout(function() {
         var selection = window.getSelection();
         var selectedText = selection ? selection.toString().trim() : '';
         if (!selectedText || selectedText.length === 0 || selectedText.length > 100) { removeTooltip(); return; }
@@ -2551,13 +2581,23 @@ function setupTextSelection() {
         selectionTooltip.style.left = (rect.left + window.scrollX + (rect.width / 2)) + 'px';
         document.body.appendChild(selectionTooltip);
 
-        // Clamp to viewport edges
+        // Clamp to viewport edges (transform translateX(-50%) means left is center point)
         requestAnimationFrame(function() {
             if (!selectionTooltip) return;
             var tr = selectionTooltip.getBoundingClientRect();
-            if (tr.left < 4) selectionTooltip.style.left = (4 + tr.width / 2) + 'px';
-            if (tr.right > window.innerWidth - 4) selectionTooltip.style.left = (window.innerWidth - 4 - tr.width / 2 + window.scrollX) + 'px';
-            if (tr.top < 4) selectionTooltip.style.top = (rect.bottom + window.scrollY + 4) + 'px';
+            var halfW = tr.width / 2;
+            // Left edge overflow
+            if (tr.left < 4) {
+                selectionTooltip.style.left = (halfW + 4) + 'px';
+            }
+            // Right edge overflow
+            if (tr.right > window.innerWidth - 4) {
+                selectionTooltip.style.left = (window.innerWidth - halfW - 4 + window.scrollX) + 'px';
+            }
+            // Top edge overflow → show below selection instead
+            if (tr.top < 4) {
+                selectionTooltip.style.top = (rect.bottom + window.scrollY + 4) + 'px';
+            }
         });
 
         // Vocab add button
@@ -2643,9 +2683,16 @@ function setupTextSelection() {
                 toastr.error('후리가나 생성 실패: ' + err.message);
             }
         });
-    });
+        }, e.type === 'touchend' ? 300 : 0);
+    }
+
+    document.addEventListener('mouseup', showTooltipForSelection);
+    document.addEventListener('touchend', showTooltipForSelection);
 
     document.addEventListener('mousedown', function(e) {
+        if (selectionTooltip && !selectionTooltip.contains(e.target)) removeTooltip();
+    });
+    document.addEventListener('touchstart', function(e) {
         if (selectionTooltip && !selectionTooltip.contains(e.target)) removeTooltip();
     });
     var chatScroll = document.getElementById('chat');

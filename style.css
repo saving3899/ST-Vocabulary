@@ -110,6 +110,7 @@
     right: -380px;
     width: 370px;
     height: 100vh;
+    height: 100dvh;
     background: var(--SmartThemeBlurTintColor, #1a1a2e);
     border-left: 1px solid var(--SmartThemeBorderColor, #333);
     z-index: 10000;
@@ -580,12 +581,15 @@
     left: 0;
     width: 100vw;
     height: 100vh;
+    height: 100dvh;
     background: rgba(0, 0, 0, 0.6);
     z-index: 10001;
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
     animation: stv-fade-in 0.2s ease;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 @keyframes stv-fade-in {
@@ -602,6 +606,8 @@
     width: 420px;
     max-width: 90vw;
     max-height: 85vh;
+    max-height: 85dvh;
+    margin: auto;
     background: var(--SmartThemeBlurTintColor, #1a1a2e);
     border: 1px solid var(--SmartThemeBorderColor, #444);
     border-radius: 12px;
@@ -906,10 +912,16 @@
     background: rgba(100, 149, 237, 0.05) !important;
 }
 
-/* ── Word Info Dialog (read-only) ─────────────────── */
+/* ── Word Info Dialog (read-only) ──────────────────────── */
 
 .stv-info-dialog {
     width: 400px;
+}
+
+/* ── Export Dialog ────────────────────────────────── */
+
+.stv-export-dialog {
+    width: 380px;
 }
 
 .stv-info-word-header {
@@ -1424,6 +1436,109 @@
     font-size: 12px;
 }
 
+/* ── Snackbar (Base Form Suggestion) ──────────────── */
+
+.stv-snackbar {
+    position: fixed;
+    bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    z-index: 10003;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 16px;
+    border-radius: 10px;
+    border: 1px solid var(--SmartThemeBorderColor, #444);
+    background: var(--SmartThemeBlurTintColor, #1e1e2e);
+    color: var(--SmartThemeBodyColor, #eee);
+    font-size: 13px;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5);
+    opacity: 0;
+    -webkit-transition: transform 0.3s ease, opacity 0.3s ease;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    max-width: 90vw;
+    -webkit-transform: translateX(-50%) translateY(100px);
+}
+
+.stv-snackbar-show {
+    -webkit-transform: translateX(-50%) translateY(0);
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+}
+
+.stv-snackbar-hide {
+    -webkit-transform: translateX(-50%) translateY(100px);
+    transform: translateX(-50%) translateY(100px);
+    opacity: 0;
+}
+
+.stv-snackbar-icon {
+    color: #f0c040;
+    margin-right: 2px;
+}
+
+.stv-snackbar-text {
+    flex: 1;
+    line-height: 1.4;
+}
+
+.stv-snackbar-text b {
+    color: cornflowerblue;
+}
+
+.stv-snackbar-actions {
+    display: flex;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+.stv-snackbar-btn {
+    border: none;
+    border-radius: 6px;
+    padding: 5px 14px;
+    font-size: 12px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.2s;
+}
+
+.stv-snackbar-btn.stv-snackbar-yes {
+    background: cornflowerblue;
+    color: #fff;
+}
+
+.stv-snackbar-btn.stv-snackbar-yes:hover {
+    background: #4a86e0;
+}
+
+.stv-snackbar-btn.stv-snackbar-no {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--SmartThemeBodyColor, #ccc);
+}
+
+.stv-snackbar-btn.stv-snackbar-no:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* ── Furigana Progress Snackbar ───────────────────── */
+
+.stv-furigana-progress .stv-furigana-progress-spin {
+    display: inline-block;
+    animation: stv-spin 1s linear infinite;
+    margin-right: 4px;
+    color: cornflowerblue;
+}
+
+.stv-snackbar-btn.stv-snackbar-stop {
+    background: #e74c3c;
+    color: #fff;
+}
+
+.stv-snackbar-btn.stv-snackbar-stop:hover {
+    background: #c0392b;
+}
+
 /* ── Responsive ───────────────────────────────────── */
 
 @media (max-width: 600px) {
@@ -1433,9 +1548,13 @@
         right: -100vw;
     }
 
+    .stv-panel-open {
+        right: 0;
+    }
+
     /* Backdrop visible on mobile when panel open */
     .stv-panel-open~.stv-backdrop,
-    .stv-backdrop.stv-backdrop-visible {
+    .stv-backdrop.stv-backdrop-show {
         display: block;
         position: fixed;
         inset: 0;
@@ -1518,6 +1637,7 @@
         width: 95vw;
         max-width: 95vw;
         max-height: 90vh;
+        max-height: 90dvh;
         border-radius: 10px;
     }
 
@@ -1611,7 +1731,7 @@
         padding: 10px 14px;
         max-width: 92vw;
         gap: 8px;
-        bottom: 16px;
+        bottom: calc(16px + env(safe-area-inset-bottom, 0px));
     }
 
     .stv-snackbar-text {
@@ -1751,105 +1871,6 @@
         font-size: 12px;
         padding: 8px 12px;
     }
-}
-
-/* ── Snackbar (Base Form Suggestion) ──────────────── */
-
-.stv-snackbar {
-    position: fixed;
-    bottom: 24px;
-    left: 50%;
-    transform: translateX(-50%) translateY(100px);
-    z-index: 10003;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 10px 16px;
-    border-radius: 10px;
-    border: 1px solid var(--SmartThemeBorderColor, #444);
-    background: var(--SmartThemeBlurTintColor, #1e1e2e);
-    color: var(--SmartThemeBodyColor, #eee);
-    font-size: 13px;
-    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5);
-    opacity: 0;
-    transition: transform 0.3s ease, opacity 0.3s ease;
-    max-width: 90vw;
-}
-
-.stv-snackbar-show {
-    transform: translateX(-50%) translateY(0);
-    opacity: 1;
-}
-
-.stv-snackbar-hide {
-    transform: translateX(-50%) translateY(100px);
-    opacity: 0;
-}
-
-.stv-snackbar-icon {
-    color: #f0c040;
-    margin-right: 2px;
-}
-
-.stv-snackbar-text {
-    flex: 1;
-    line-height: 1.4;
-}
-
-.stv-snackbar-text b {
-    color: cornflowerblue;
-}
-
-.stv-snackbar-actions {
-    display: flex;
-    gap: 6px;
-    flex-shrink: 0;
-}
-
-.stv-snackbar-btn {
-    border: none;
-    border-radius: 6px;
-    padding: 5px 14px;
-    font-size: 12px;
-    cursor: pointer;
-    font-family: inherit;
-    transition: background 0.2s;
-}
-
-.stv-snackbar-btn.stv-snackbar-yes {
-    background: cornflowerblue;
-    color: #fff;
-}
-
-.stv-snackbar-btn.stv-snackbar-yes:hover {
-    background: #4a86e0;
-}
-
-.stv-snackbar-btn.stv-snackbar-no {
-    background: rgba(255, 255, 255, 0.1);
-    color: var(--SmartThemeBodyColor, #ccc);
-}
-
-.stv-snackbar-btn.stv-snackbar-no:hover {
-    background: rgba(255, 255, 255, 0.2);
-}
-
-/* ── Furigana Progress Snackbar ───────────────────── */
-
-.stv-furigana-progress .stv-furigana-progress-spin {
-    display: inline-block;
-    animation: stv-spin 1s linear infinite;
-    margin-right: 4px;
-    color: cornflowerblue;
-}
-
-.stv-snackbar-btn.stv-snackbar-stop {
-    background: #e74c3c;
-    color: #fff;
-}
-
-.stv-snackbar-btn.stv-snackbar-stop:hover {
-    background: #c0392b;
 }
 
 /* ── Export Dialog ────────────────────────────────── */
