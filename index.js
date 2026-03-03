@@ -2577,24 +2577,31 @@ function setupTextSelection() {
         selectionTooltip.className = 'stv-selection-tooltip';
         selectionTooltip.innerHTML = '<button class="stv-tooltip-btn stv-tooltip-vocab" title="단어장에 추가"><span class="fa-solid fa-book-bookmark"></span> 단어장에 추가</button>'
             + '<button class="stv-tooltip-btn stv-tooltip-furigana" title="후리가나 달기"><span class="fa-solid fa-language"></span> 후리가나</button>';
+        // Capture sentence and word now (selection is a live object that clears on button click)
+        var capturedWord = getCleanSelectedText(selection) || selectedText;
+        var capturedSentence = extractSentenceFromSelection(selection);
+
         selectionTooltip.style.top = (rect.top + window.scrollY - 40) + 'px';
-        selectionTooltip.style.left = (rect.left + window.scrollX + (rect.width / 2)) + 'px';
+        // left will be set after measuring width in rAF
         document.body.appendChild(selectionTooltip);
 
-        // Clamp to viewport edges (transform translateX(-50%) means left is center point)
+        // Measure and clamp to viewport
         requestAnimationFrame(function() {
             if (!selectionTooltip) return;
-            var tr = selectionTooltip.getBoundingClientRect();
-            var halfW = tr.width / 2;
-            // Left edge overflow
-            if (tr.left < 4) {
-                selectionTooltip.style.left = (halfW + 4) + 'px';
+            var tw = selectionTooltip.offsetWidth;
+            // Center tooltip on selection, then clamp
+            var centerX = rect.left + window.scrollX + (rect.width / 2);
+            var left = centerX - (tw / 2);
+            // Clamp left edge
+            if (left < 4 + window.scrollX) left = 4 + window.scrollX;
+            // Clamp right edge
+            if (left + tw > window.scrollX + window.innerWidth - 4) {
+                left = window.scrollX + window.innerWidth - 4 - tw;
             }
-            // Right edge overflow
-            if (tr.right > window.innerWidth - 4) {
-                selectionTooltip.style.left = (window.innerWidth - halfW - 4 + window.scrollX) + 'px';
-            }
+            selectionTooltip.style.left = left + 'px';
+
             // Top edge overflow → show below selection instead
+            var tr = selectionTooltip.getBoundingClientRect();
             if (tr.top < 4) {
                 selectionTooltip.style.top = (rect.bottom + window.scrollY + 4) + 'px';
             }
@@ -2603,14 +2610,12 @@ function setupTextSelection() {
         // Vocab add button
         selectionTooltip.querySelector('.stv-tooltip-vocab').addEventListener('click', async function(ev) {
             ev.stopPropagation();
-            var word = getCleanSelectedText(selection) || selectedText;
-            var sentence = extractSentenceFromSelection(selection);
             removeTooltip();
             if (window.getSelection()) window.getSelection().removeAllRanges();
-            await showWordDialog(null, { contextSentence: sentence });
+            await showWordDialog(null, { contextSentence: capturedSentence });
             var wordInput = document.getElementById('stv-dlg-word');
             if (wordInput) {
-                wordInput.value = word;
+                wordInput.value = capturedWord;
             }
         });
 

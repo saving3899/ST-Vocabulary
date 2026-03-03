@@ -1058,7 +1058,6 @@
 .stv-selection-tooltip {
     position: absolute;
     z-index: 10002;
-    transform: translateX(-50%);
     animation: stv-pop-in 0.15s ease;
     display: flex;
     gap: 4px;
@@ -1066,12 +1065,12 @@
 
 @keyframes stv-pop-in {
     from {
-        transform: translateX(-50%) scale(0.8);
+        transform: scale(0.8);
         opacity: 0;
     }
 
     to {
-        transform: translateX(-50%) scale(1);
+        transform: scale(1);
         opacity: 1;
     }
 }
