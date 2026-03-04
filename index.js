@@ -84,6 +84,7 @@ const defaultSettings = Object.freeze({
     furiganaColor: '#888888',
     furiganaOpacity: 0.9,
     highlightVocab: false,
+    highlightWordForms: false,
     vocabHighlightColor: '#6495ED',
     vocabHoverColor: '#6495ED',
     furiganaHover: false,
@@ -458,14 +459,23 @@ function applyFuriganaToElement(element, readings, force) {
         if (changed) {
             var settings2 = getSettings();
             var vocabWords = new Set();
+            var formsMapLocal = null;
             if (settings2.highlightVocab) {
                 settings2.vocabList.forEach(function(w) { vocabWords.add(w.word); });
+                if (settings2.highlightWordForms) {
+                    formsMapLocal = buildWordFormsMap();
+                }
             }
             for (var ri2 = 0; ri2 < placeholders.length; ri2++) {
                 var ph2 = placeholders[ri2];
                 var isVocab = vocabWords.has(ph2.word);
-                var cls = 'stv-ruby' + (isVocab ? ' stv-vocab-highlight' : '');
-                var ruby = '<ruby class="' + cls + '" data-stv-word="' + escapeHtml(ph2.word) + '">' + escapeHtml(ph2.word)
+                var isForm = !isVocab && formsMapLocal && formsMapLocal[ph2.word];
+                var cls = 'stv-ruby' + ((isVocab || isForm) ? ' stv-vocab-highlight' : '') + (isForm ? ' stv-vocab-form' : '');
+                var dataAttr = ' data-stv-word="' + escapeHtml(ph2.word) + '"';
+                if (isForm) {
+                    dataAttr += ' data-stv-base-id="' + escapeHtml(formsMapLocal[ph2.word].baseWordId) + '"';
+                }
+                var ruby = '<ruby class="' + cls + '"' + dataAttr + '>' + escapeHtml(ph2.word)
                     + '<rp>(</rp><rt>' + escapeHtml(ph2.reading) + '</rt><rp>)</rp></ruby>';
                 html = html.split(ph2.token).join(ruby);
             }
@@ -487,8 +497,23 @@ function highlightVocabInElement(element) {
     if (!settings.highlightVocab || !settings.vocabList || settings.vocabList.length === 0) return;
 
     // Build sorted word list (longest first to avoid partial matches)
+    var savedWordsSet = new Set(settings.vocabList.map(function(w) { return w.word; }));
     var vocabWords = settings.vocabList.map(function(w) { return w.word; })
-        .filter(function(w) { return w && w.length > 0; })
+        .filter(function(w) { return w && w.length > 0; });
+
+    // Build forms map for highlighting conjugated forms
+    var formsMap = null;
+    if (settings.highlightWordForms) {
+        formsMap = buildWordFormsMap();
+        // Add form words to the highlight list (if not already a saved word)
+        Object.keys(formsMap).forEach(function(formWord) {
+            if (!savedWordsSet.has(formWord)) {
+                vocabWords.push(formWord);
+            }
+        });
+    }
+
+    vocabWords = vocabWords.filter(function(w) { return w && w.length > 0; })
         .sort(function(a, b) { return b.length - a.length; });
     if (vocabWords.length === 0) return;
 
@@ -549,7 +574,10 @@ function highlightVocabInElement(element) {
         for (var pi = 0; pi < placeholders.length; pi++) {
             var ph = placeholders[pi];
             var phToken = escapeHtml(PLACEHOLDER_PREFIX + pi + PLACEHOLDER_SUFFIX);
-            html = html.replace(phToken, '<span class="stv-vocab-hl-span stv-vocab-highlight" data-stv-word="' + escapeHtml(ph.word) + '">' + escapeHtml(ph.matched) + '</span>');
+            var isFormWord = formsMap && formsMap[ph.word] && !savedWordsSet.has(ph.word);
+            var extraCls = isFormWord ? ' stv-vocab-form' : '';
+            var extraAttr = isFormWord ? ' data-stv-base-id="' + escapeHtml(formsMap[ph.word].baseWordId) + '"' : '';
+            html = html.replace(phToken, '<span class="stv-vocab-hl-span stv-vocab-highlight' + extraCls + '" data-stv-word="' + escapeHtml(ph.word) + '"' + extraAttr + '>' + escapeHtml(ph.matched) + '</span>');
         }
 
         var wrapper = document.createElement('span');
@@ -559,14 +587,14 @@ function highlightVocabInElement(element) {
     }
 
     // Second pass: highlight vocab words spanning multiple nodes (ruby + text)
-    highlightVocabAcrossNodes(element, vocabWords);
+    highlightVocabAcrossNodes(element, vocabWords, formsMap, savedWordsSet);
 }
 
 /**
  * Highlight vocab words that span multiple DOM nodes after furigana application.
  * E.g., '沸き上がる' split into ruby(沸) + text(き) + ruby(上) + text(がる).
  */
-function highlightVocabAcrossNodes(element, vocabWords) {
+function highlightVocabAcrossNodes(element, vocabWords, formsMap, savedWordsSet) {
     if (!element.querySelector('.stv-ruby')) return;
     var vocabMulti = vocabWords.filter(function(w) { return w.length > 1; });
     if (vocabMulti.length === 0) return;
@@ -576,7 +604,7 @@ function highlightVocabAcrossNodes(element, vocabWords) {
         var wrappers = element.querySelectorAll('.stv-furigana-wrapper');
         var didModify = false;
         for (var wi = 0; wi < wrappers.length; wi++) {
-            if (_matchVocabInWrapper(wrappers[wi], vocabMulti)) {
+            if (_matchVocabInWrapper(wrappers[wi], vocabMulti, formsMap, savedWordsSet)) {
                 didModify = true;
                 break;
             }
@@ -585,7 +613,7 @@ function highlightVocabAcrossNodes(element, vocabWords) {
     }
 }
 
-function _matchVocabInWrapper(wrapper, vocabWords) {
+function _matchVocabInWrapper(wrapper, vocabWords, formsMap, savedWordsSet) {
     if (wrapper.closest('.stv-vocab-hl-span')) return false;
     var segments = [];
     var pos = 0;
@@ -651,8 +679,12 @@ function _matchVocabInWrapper(wrapper, vocabWords) {
         if (firstSeg.start !== matchStart || lastSeg.end !== matchEnd) continue;
 
         var hlSpan = document.createElement('span');
-        hlSpan.className = 'stv-vocab-hl-span stv-vocab-highlight';
+        var isFormAcross = formsMap && formsMap[vw] && savedWordsSet && !savedWordsSet.has(vw);
+        hlSpan.className = 'stv-vocab-hl-span stv-vocab-highlight' + (isFormAcross ? ' stv-vocab-form' : '');
         hlSpan.setAttribute('data-stv-word', vw);
+        if (isFormAcross) {
+            hlSpan.setAttribute('data-stv-base-id', formsMap[vw].baseWordId);
+        }
         wrapper.insertBefore(hlSpan, firstSeg.node);
         for (var mi = 0; mi < matchedIdxs.length; mi++) {
             hlSpan.appendChild(segments[matchedIdxs[mi]].node);
@@ -1029,6 +1061,34 @@ function applyTheme() {
 
 function getVocab() {
     return getSettings().vocabList || [];
+}
+
+/**
+ * Build a map: conjugated/inflected form word → { baseWordId, baseWord }
+ * Used when highlightWordForms is enabled.
+ * If a conjugated form is ALSO individually saved in vocab, it maps to its own entry (priority).
+ */
+function buildWordFormsMap() {
+    var vocab = getVocab();
+    var savedWords = new Set(vocab.map(function(w) { return w.word; }));
+    var formsMap = {}; // formWord → { baseWordId, baseWord, baseVocabWord }
+    vocab.forEach(function(w) {
+        if (!w.wordForms || typeof w.wordForms !== 'object') return;
+        Object.keys(w.wordForms).forEach(function(groupLabel) {
+            var forms = w.wordForms[groupLabel];
+            if (!Array.isArray(forms)) return;
+            forms.forEach(function(form) {
+                var formWord = form.word || '';
+                if (!formWord || formWord === w.word) return;
+                // Don't overwrite if this form is a separately saved vocab word
+                if (savedWords.has(formWord)) return;
+                // Don't overwrite if already mapped from another base word (first wins)
+                if (formsMap[formWord]) return;
+                formsMap[formWord] = { baseWordId: w.id, baseWord: w.word };
+            });
+        });
+    });
+    return formsMap;
 }
 
 function addVocabWord(data) {
@@ -2136,6 +2196,7 @@ async function showWordDialog(editId, opts) {
     if (!editId) editId = null;
     if (!opts) opts = {};
     var contextSentence = opts.contextSentence || '';
+    var initWord = opts.initWord || '';
     var existingOverlay = document.getElementById('stv-dialog-overlay');
     if (existingOverlay) existingOverlay.remove();
 
@@ -2185,9 +2246,12 @@ async function showWordDialog(editId, opts) {
         + '<div class="stv-dialog-body">'
         + '<div class="stv-field"><label>단어 <span class="stv-required">*</span></label>'
         + '<div class="stv-word-row">'
-        + '<input type="text" id="stv-dlg-word" value="' + escapeHtml(existing ? existing.word : '') + '" placeholder="단어를 입력하세요" />'
+        + '<input type="text" id="stv-dlg-word" value="' + escapeHtml(existing ? existing.word : (initWord || '')) + '" placeholder="단어를 입력하세요" />'
         + '<select id="stv-dlg-lang" title="언어 선택">' + langSelectHtml + '</select>'
-        + '</div></div>'
+        + '</div>'
+        + '<button type="button" class="stv-btn stv-btn-baseform" id="stv-dlg-find-baseform" title="AI로 원형을 찾아 새 다이얼로그를 엽니다">'
+        + '<span class="fa-solid fa-magnifying-glass"></span> 원형 찾기</button>'
+        + '</div>'
         + '<div class="stv-field"><label>발음 / 읽기</label>'
         + '<input type="text" id="stv-dlg-reading" value="' + escapeHtml(existing ? existing.reading : '') + '" placeholder="히라가나, IPA, 병음 등" /></div>'
         + '<div class="stv-field"><label>뜻</label>'
@@ -2245,6 +2309,36 @@ async function showWordDialog(editId, opts) {
     // Track whether AI analysis was used and detected base form
     var detectedBaseForm = null;
     var detectedWordForms = null;
+
+    // ── Base form find button ──
+    overlay.querySelector('#stv-dlg-find-baseform').addEventListener('click', async function() {
+        var wordInput = document.getElementById('stv-dlg-word');
+        var wordVal = wordInput ? wordInput.value.trim() : '';
+        if (!wordVal) { toastr.warning('먼저 단어를 입력하세요.'); return; }
+        var findBtn = overlay.querySelector('#stv-dlg-find-baseform');
+        findBtn.disabled = true;
+        findBtn.innerHTML = '<span class="fa-solid fa-spinner fa-spin"></span>';
+        var langSel = document.getElementById('stv-dlg-lang');
+        var selectedLang = langSel ? langSel.value : 'auto';
+        try {
+            var bf = await detectBaseForm(wordVal, selectedLang);
+            if (bf) {
+                // Gather current contextSentence if available
+                var ctxEl = document.getElementById('stv-dlg-context-sentence');
+                var curCtx = ctxEl ? ctxEl.value.trim() : contextSentence;
+                closeDialog();
+                toastr.info('"' + wordVal + '" → 원형 "' + bf + '"으로 새 다이얼로그를 엽니다.');
+                showWordDialog(null, { initWord: bf, contextSentence: curCtx });
+            } else {
+                toastr.info('"' + wordVal + '"은(는) 이미 원형입니다.');
+            }
+        } catch (e) {
+            console.error('[ST-Vocabulary] Base form lookup error:', e);
+            toastr.error('원형 검색에 실패했습니다.');
+        }
+        findBtn.disabled = false;
+        findBtn.innerHTML = '<span class="fa-solid fa-magnifying-glass"></span> 원형 찾기';
+    });
 
     // AI Analyze
     overlay.querySelector('#stv-dlg-analyze').addEventListener('click', async function() {
@@ -2324,6 +2418,7 @@ async function showWordDialog(editId, opts) {
             detectedBaseForm = result.baseForm.trim();
         }
         detectedWordForms = (result && result.wordForms && typeof result.wordForms === 'object') ? result.wordForms : null;
+
         } catch (e) {
             console.error('[ST-Vocabulary] AI analyze error:', e);
             toastr.error('AI 분석 중 오류 발생');
@@ -2462,8 +2557,23 @@ function setupVocabHighlightClickDelegation() {
         e.preventDefault();
         var wordText = hlSpan.getAttribute('data-stv-word');
         if (!wordText) return;
+
+        // Check if this word is individually saved in vocab
         var vocabItem = getVocab().find(function(v) { return v.word === wordText; });
-        if (vocabItem) showWordInfoDialog(vocabItem.id);
+        if (vocabItem) {
+            showWordInfoDialog(vocabItem.id);
+            return;
+        }
+
+        // Check if this is a conjugated form mapping to a base word
+        var baseId = hlSpan.getAttribute('data-stv-base-id');
+        if (baseId) {
+            var baseItem = getVocab().find(function(v) { return v.id === baseId; });
+            if (baseItem) {
+                showWordInfoDialog(baseItem.id);
+                return;
+            }
+        }
     }, true); // useCapture to fire before other handlers
 }
 
@@ -3243,6 +3353,8 @@ function showSettingsModal() {
         + '<span id="stv-furigana-opacity-label">' + Math.round((s.furiganaOpacity != null ? s.furiganaOpacity : 0.9) * 100) + '%</span></div></div>'
         + '<div class="stv-setting-row"><label>단어장 단어 하이라이트</label>'
         + '<input type="checkbox" id="stv-set-highlight"' + (s.highlightVocab ? ' checked' : '') + ' /></div>'
+        + '<div class="stv-setting-row stv-setting-sub"><label>활용형도 하이라이트</label>'
+        + '<input type="checkbox" id="stv-set-highlight-forms"' + (s.highlightWordForms ? ' checked' : '') + ' /></div>'
         + '<div class="stv-setting-row"><label>하이라이트 색상</label>'
         + '<div class="stv-range-wrapper">'
         + '<input type="color" id="stv-set-vocab-color" value="' + (s.vocabHighlightColor || '#6495ED') + '" style="width:36px;height:28px;padding:1px;border:1px solid var(--SmartThemeBorderColor,#444);border-radius:4px;background:transparent;cursor:pointer;" />'
@@ -3375,6 +3487,7 @@ function showSettingsModal() {
         settings.furiganaColor = document.getElementById('stv-set-furigana-color').value || '#888888';
         settings.furiganaOpacity = parseFloat(document.getElementById('stv-set-furigana-opacity').value) || 0.9;
         settings.highlightVocab = document.getElementById('stv-set-highlight').checked;
+        settings.highlightWordForms = document.getElementById('stv-set-highlight-forms').checked;
         settings.vocabHighlightColor = document.getElementById('stv-set-vocab-color').value || '#6495ED';
         settings.vocabHoverColor = document.getElementById('stv-set-vocab-hover-color').value || '#6495ED';
         settings.furiganaHover = document.getElementById('stv-set-hover').checked;
@@ -3564,9 +3677,11 @@ function refreshVocabHighlightsInChat() {
             parent.normalize();
         }
     });
-    // Also remove stv-vocab-highlight from ruby elements (re-evaluate below)
+    // Also remove stv-vocab-highlight and stv-vocab-form from ruby elements (re-evaluate below)
     document.querySelectorAll('#chat .mes .mes_text .stv-ruby.stv-vocab-highlight').forEach(function(ruby) {
         ruby.classList.remove('stv-vocab-highlight');
+        ruby.classList.remove('stv-vocab-form');
+        ruby.removeAttribute('data-stv-base-id');
     });
     // Re-apply
     highlightAllVocabInChat();
@@ -3574,9 +3689,15 @@ function refreshVocabHighlightsInChat() {
     var settings = getSettings();
     if (settings.highlightVocab && settings.vocabList) {
         var vocabWords = new Set(settings.vocabList.map(function(w) { return w.word; }));
+        var formsMapRefresh = settings.highlightWordForms ? buildWordFormsMap() : null;
         document.querySelectorAll('#chat .mes .mes_text .stv-ruby[data-stv-word]').forEach(function(ruby) {
-            if (vocabWords.has(ruby.getAttribute('data-stv-word'))) {
+            var rubyWord = ruby.getAttribute('data-stv-word');
+            if (vocabWords.has(rubyWord)) {
                 ruby.classList.add('stv-vocab-highlight');
+            } else if (formsMapRefresh && formsMapRefresh[rubyWord]) {
+                ruby.classList.add('stv-vocab-highlight');
+                ruby.classList.add('stv-vocab-form');
+                ruby.setAttribute('data-stv-base-id', formsMapRefresh[rubyWord].baseWordId);
             }
         });
     }

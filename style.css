@@ -36,7 +36,7 @@
 #chat .mes .mes_text .stv-ruby.stv-vocab-highlight,
 #chat .mes .mes_text .stv-vocab-hl-span.stv-vocab-highlight {
     background: var(--stv-vocab-bg, rgba(100, 149, 237, 0.12)) !important;
-    border-radius: 3px !important;
+    /* border-radius: 3px !important; */
     padding: 0 !important;
     border-bottom: 2px solid var(--stv-vocab-border, rgba(100, 149, 237, 0.5)) !important;
     cursor: pointer !important;
@@ -48,6 +48,13 @@
     color: var(--stv-vocab-hover-color, cornflowerblue) !important;
 }
 
+/* Conjugated/inflected form highlight (dashed border to distinguish from base word) */
+#chat .mes .mes_text .stv-ruby.stv-vocab-form,
+#chat .mes .mes_text .stv-vocab-hl-span.stv-vocab-form {
+    border-bottom-style: dashed !important;
+    opacity: 0.85;
+}
+
 /* Furigana hover: highlight word in-place (no tooltip) */
 #chat .mes .mes_text .stv-ruby[data-stv-word] {
     cursor: pointer !important;
@@ -55,7 +62,7 @@
 
 #chat.stv-furigana-hover .mes .mes_text .stv-ruby[data-stv-word]:hover {
     background: var(--stv-vocab-hover-bg, rgba(100, 149, 237, 0.18)) !important;
-    border-radius: 3px !important;
+    /* border-radius: 3px !important; */
     color: var(--stv-vocab-hover-color, cornflowerblue) !important;
     transition: background 0.15s, color 0.15s !important;
 }
@@ -697,7 +704,7 @@
 .stv-word-row {
     display: flex;
     gap: 6px;
-    align-items: center;
+    align-items: stretch;
 }
 
 .stv-word-row input {
@@ -712,7 +719,37 @@
     max-width: 90px;
     flex-shrink: 0;
     font-size: 13px;
-    padding: 8px 6px;
+    padding: 0 6px;
+}
+
+/* Base form find button — full width below word row */
+.stv-btn-baseform {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    width: 100%;
+    margin-top: 6px;
+    padding: 7px 0;
+    font-size: 12px;
+    border: 1px solid var(--SmartThemeBorderColor, #444);
+    border-radius: 6px;
+    background: transparent;
+    color: var(--SmartThemeQuoteColor, #aaa);
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+    box-sizing: border-box;
+}
+
+.stv-btn-baseform:hover {
+    background: rgba(100, 149, 237, 0.12);
+    color: cornflowerblue;
+    border-color: rgba(100, 149, 237, 0.4);
+}
+
+.stv-btn-baseform:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
 }
 
 .stv-field label {
@@ -1315,6 +1352,15 @@
     cursor: pointer;
 }
 
+.stv-setting-row.stv-setting-sub {
+    padding-left: 18px;
+}
+
+.stv-setting-row.stv-setting-sub label {
+    font-size: 12px;
+    color: var(--SmartThemeQuoteColor, #999);
+}
+
 .stv-range-wrapper {
     display: flex;
     align-items: center;
@@ -1719,7 +1765,6 @@
     .stv-word-row select {
         min-width: 64px;
         max-width: 80px;
-        padding: 8px 4px;
     }
 
     /* Field inputs - prevent zoom on iOS */
@@ -2118,6 +2163,7 @@
 #stv-panel .stv-search-bar input                           { font-size: 13px   !important; }
 #stv-panel .stv-filter-bar select                          { font-size: 12px   !important; }
 #stv-dialog-overlay .stv-word-row select                   { font-size: 13px   !important; }
+#stv-dialog-overlay .stv-btn-baseform                      { font-size: 12px   !important; }
 #stv-dialog-overlay .stv-field input,
 #stv-dialog-overlay .stv-field select,
 #stv-dialog-overlay .stv-field textarea                    { font-size: 14px   !important; }
@@ -2158,6 +2204,7 @@
 
 #stv-dialog-overlay .stv-word-row select {
     padding: 8px 6px !important;
+    margin: 0 !important;
 }
 
 #stv-dialog-overlay .stv-context-input {
@@ -2449,6 +2496,17 @@ body.stv-theme-light .stv-btn-save {
 
 body.stv-theme-light .stv-btn-edit {
     background: rgba(100, 149, 237, 0.08);
+}
+
+body.stv-theme-light .stv-btn-baseform {
+    color: #777;
+    border-color: #ddd;
+}
+
+body.stv-theme-light .stv-btn-baseform:hover {
+    background: rgba(100, 149, 237, 0.08);
+    color: #4a7dd6;
+    border-color: rgba(100, 149, 237, 0.3);
 }
 
 body.stv-theme-light .stv-setting-row {
