@@ -1198,9 +1198,10 @@ async function analyzeWordWithLLM(word, langOverride) {
         + '  → Empty string "" if the word is already in its dictionary/base form.\n'
         + '- "baseForm": If the word is a conjugated/inflected form, return its dictionary/base form (원형). E.g. 介さず→"介する", 食べた→"食べる", ran→"run", 먹었다→"먹다". Return null if already in base form.\n'
         + '- "examples": array of 2 objects, each with "sentence" (example sentence in original language)' + (lang === 'ko' ? '. Since this is a Korean word, do NOT include "translation" field — Korean examples need no translation.\n' : ' and "translation" (Korean translation of that sentence)\n')
-        + '- "wordForms": an object listing ALL inflected/derived forms of this word, grouped by part of speech. Each key is a part-of-speech label in Korean (e.g. "동사형", "명사형", "형용사형"), and the value is an array of objects with "label" (form description in Korean) and "word" (the actual form).\n'
+        + '- "wordForms": an object listing ALL inflected/derived forms of this word, grouped by part of speech. Each key is a part-of-speech label in Korean (e.g. "동사형", "명사형", "형용사형"), and the value is an array of objects with "label" (form description in Korean) and "word" (the actual form). IMPORTANT: "word" must contain ONLY the word itself, without any reading/pronunciation in parentheses. Correct: "食べて". Wrong: "食べて (たべて)".\n'
         + '  → Example for English "do": {"동사형":[{"label":"3인칭 단수 현재","word":"does"},{"label":"과거형","word":"did"},{"label":"과거 분사","word":"done"},{"label":"현재 분사","word":"doing"}],"명사형":[{"label":"복수형","word":"dos"}]}\n'
         + '  → Example for Japanese "食べる": {"동사형":[{"label":"て형","word":"食べて"},{"label":"た형","word":"食べた"},{"label":"ない형","word":"食べない"},{"label":"ます형","word":"食べます"},{"label":"受身형","word":"食べられる"},{"label":"使役형","word":"食べさせる"},{"label":"可能형","word":"食べられる"},{"label":"意向형","word":"食べよう"},{"label":"仮定형","word":"食べれば"},{"label":"命令형","word":"食べろ"}]}\n'
+        + '  → For Japanese verbs, ALSO include the 連用形 (continuative/stem form) used as a noun if it is commonly used. Add it under "명사형" group with label "連用形/명사". Examples: 空く→空き, 休む→休み, 動く→動き, 始まる→始まり, 終わる→終わり, 遊ぶ→遊び, 流れる→流れ, 話す→話, 光る→光\n'
         + '  → Example for Korean "먹다": {"동사형":[{"label":"과거형","word":"먹었다"},{"label":"현재 진행","word":"먹고 있다"},{"label":"연결형 -아/어","word":"먹어"},{"label":"관형사형","word":"먹는/먹은/먹을"}]}\n'
         + '  → Include forms for ALL parts of speech the word can serve as. If the word is ONLY used as one part of speech, include just that one group.\n'
         + '  → If the word is already a conjugated form, show forms based on its dictionary/base form.\n\n'
@@ -1223,6 +1224,20 @@ async function analyzeWordWithLLM(word, langOverride) {
                 if (typeof ex === 'string') return { sentence: ex, translation: '' };
                 if (ex && typeof ex === 'object') return { sentence: ex.sentence || '', translation: ex.translation || '' };
                 return { sentence: String(ex), translation: '' };
+            });
+        }
+        // Clean wordForms: strip parenthetical readings from word fields
+        if (result.wordForms && typeof result.wordForms === 'object') {
+            Object.keys(result.wordForms).forEach(function(groupKey) {
+                var forms = result.wordForms[groupKey];
+                if (Array.isArray(forms)) {
+                    forms.forEach(function(form) {
+                        if (form.word && typeof form.word === 'string') {
+                            // Remove readings like "(あく)" or "（あく）" or " (あく)"
+                            form.word = form.word.replace(/\s*[\(\uff08][^\)\uff09]*[\)\uff09]\s*$/, '').trim();
+                        }
+                    });
+                }
             });
         }
         return result;
@@ -1290,6 +1305,9 @@ async function detectBaseForm(word, langOverride) {
         + '- For Japanese:\n'
         + '  • Verbs: ANY conjugated form → dictionary form (e.g. 食べた→食べる, 走って→走る, にして→にする, 話せば→話す, 書かない→書く, 見られる→見る, させる→する)\n'
         + '  • て形/た形/ます形/ない形/ば形/受身形/使役形/可能形/意向形/命令形 → ALL are NOT base form\n'
+        + '  • 連用形 (continuative form) used as noun: these are derived nouns from verbs. Return the verb dictionary form.\n'
+        + '    Examples: 空き(あき)→空く(あく), 休み(やすみ)→休む(やすむ), 始まり(はじまり)→始まる(はじまる), 終わり(おわり)→終わる(おわる), 動き(うごき)→動く(うごく), 遊び(あそび)→遊ぶ(あそぶ)\n'
+        + '    HOWEVER: If the noun form is the PRIMARY/most common usage and rarely used as a verb in modern Japanese (e.g. 話=story is primarily a noun), return null.\n'
         + '  • Compound verbs with particles: にして→にする, として→とする, について→につく or について(as grammar point→null)\n'
         + '  • i-adjectives: 美しかった→美しい, 大きくて→大きい, 良くない→良い\n'
         + '  • na-adjectives: 静かだった→静かだ, きれいで→きれいだ\n'
@@ -3091,6 +3109,283 @@ function addFuriganaButtonsToAll() {
     });
 }
 
+// ── Word Data Update Modal ─────────────────────────────
+
+/**
+ * Check if a word's wordForms data has quality issues (e.g. readings in parentheses).
+ */
+function wordFormsHasIssues(w) {
+    if (!w.wordForms || typeof w.wordForms !== 'object') return false;
+    var groups = Object.keys(w.wordForms);
+    for (var i = 0; i < groups.length; i++) {
+        var forms = w.wordForms[groups[i]];
+        if (!Array.isArray(forms)) continue;
+        for (var j = 0; j < forms.length; j++) {
+            if (forms[j].word && /[\(\uff08]/.test(forms[j].word)) return true;
+        }
+    }
+    return false;
+}
+
+/**
+ * Strip parenthetical readings from existing wordForms data in-place.
+ */
+function cleanWordFormsData(wordForms) {
+    if (!wordForms || typeof wordForms !== 'object') return wordForms;
+    Object.keys(wordForms).forEach(function(groupKey) {
+        var forms = wordForms[groupKey];
+        if (!Array.isArray(forms)) return;
+        forms.forEach(function(form) {
+            if (form.word && typeof form.word === 'string') {
+                form.word = form.word.replace(/\s*[\(\uff08][^\)\uff09]*[\)\uff09]\s*$/, '').trim();
+            }
+        });
+    });
+    return wordForms;
+}
+
+function showWordUpdateModal() {
+    var settings = getSettings();
+    var vocabList = settings.vocabList;
+
+    if (vocabList.length === 0) {
+        toastr.info('단어장이 비어 있습니다.');
+        return;
+    }
+
+    var overlay = document.createElement('div');
+    overlay.id = 'stv-word-update-overlay';
+    overlay.className = 'stv-dialog-overlay';
+
+    // Categorize words
+    var issueCount = 0;
+    var missingCount = 0;
+
+    // Build word list HTML
+    var listHtml = '';
+    vocabList.forEach(function(w) {
+        var langMap = { ja: '일', en: '영', ko: '한', zh: '중' };
+        var langLabel = langMap[w.language] || '?';
+        var hasWordForms = w.wordForms && typeof w.wordForms === 'object' && Object.keys(w.wordForms).length > 0;
+        var hasIssues = wordFormsHasIssues(w);
+        var needsUpdate = !hasWordForms || hasIssues;
+        if (!hasWordForms) missingCount++;
+        if (hasIssues) issueCount++;
+
+        var statusHtml;
+        if (hasIssues) {
+            statusHtml = '<span class="stv-update-status-warn" title="데이터 품질 문제 (괄호 읽기 포함)">⚠</span>';
+        } else if (hasWordForms) {
+            statusHtml = '<span class="stv-update-status-ok" title="정상">✓</span>';
+        } else {
+            statusHtml = '<span class="stv-update-status-miss" title="활용형 데이터 없음">—</span>';
+        }
+
+        listHtml += '<label class="stv-update-item' + (needsUpdate ? ' stv-update-needs' : '') + '">'
+            + '<input type="checkbox" class="stv-update-check" data-word-id="' + w.id + '"'
+            + (needsUpdate ? ' checked' : '') + ' />'
+            + '<span class="stv-update-lang">' + langLabel + '</span>'
+            + '<span class="stv-update-word">' + escapeHtml(w.word) + '</span>'
+            + '<span class="stv-update-meaning">' + escapeHtml((w.meaning || '').split('\n')[0]) + '</span>'
+            + statusHtml
+            + '</label>';
+    });
+
+    overlay.innerHTML = '<div class="stv-dialog stv-word-update-dialog">'
+        + '<div class="stv-dialog-header"><h3>단어 데이터 업데이트</h3>'
+        + '<button class="stv-dialog-close">&times;</button></div>'
+        + '<div class="stv-dialog-body stv-update-body">'
+        + '<div class="stv-update-mode-row">'
+        + '<label class="stv-update-mode-label"><input type="checkbox" id="stv-update-overwrite" /> 기존 데이터도 덮어쓰기 (전체 재분석)</label>'
+        + '</div>'
+        + '<div class="stv-update-info">'
+        + '<span>전체: <b>' + vocabList.length + '</b>개 단어</span>'
+        + '<div class="stv-update-select-actions">'
+        + '<button class="stv-btn stv-btn-text" id="stv-update-select-all">전체 선택</button>'
+        + '<button class="stv-btn stv-btn-text" id="stv-update-deselect-all">전체 해제</button>'
+        + '<button class="stv-btn stv-btn-text" id="stv-update-select-missing">문제만 선택</button>'
+        + '</div></div>'
+        + '<div class="stv-update-desc">'
+        + (issueCount > 0 ? '⚠ 품질 문제 <b>' + issueCount + '</b>개 (활용형에 읽기 포함) ' : '')
+        + (missingCount > 0 ? '— 데이터 누락 <b>' + missingCount + '</b>개 ' : '')
+        + (issueCount === 0 && missingCount === 0 ? '모든 단어가 정상입니다. 필요시 선택하여 재분석할 수 있습니다.' : '')
+        + '<br>✓ 정상 &nbsp; ⚠ 품질 문제 &nbsp; — 누락</div>'
+        + '<div class="stv-update-list">' + listHtml + '</div>'
+        + '</div>'
+        + '<div class="stv-dialog-footer">'
+        + '<div class="stv-update-progress" id="stv-update-progress" style="display:none;">'
+        + '<div class="stv-update-progress-bar"><div class="stv-update-progress-fill" id="stv-update-progress-fill"></div></div>'
+        + '<span class="stv-update-progress-text" id="stv-update-progress-text">0 / 0</span>'
+        + '</div>'
+        + '<button class="stv-btn stv-btn-cancel" id="stv-update-cancel" style="display:none;">중지</button>'
+        + '<button class="stv-btn stv-btn-save" id="stv-update-start">업데이트 시작</button>'
+        + '</div></div>';
+
+    document.body.appendChild(overlay);
+
+    var isRunning = false;
+    var shouldCancel = false;
+
+    var closeModal = function() {
+        if (isRunning) {
+            if (!confirm('업데이트가 진행 중입니다. 중지하시겠습니까?')) return;
+            shouldCancel = true;
+        }
+        overlay.remove();
+    };
+
+    overlay.querySelector('.stv-dialog-close').addEventListener('click', closeModal);
+    overlay.addEventListener('click', function(e) { if (e.target === overlay) closeModal(); });
+
+    // Select all / deselect all / select missing
+    document.getElementById('stv-update-select-all').addEventListener('click', function() {
+        overlay.querySelectorAll('.stv-update-check').forEach(function(cb) { cb.checked = true; });
+    });
+    document.getElementById('stv-update-deselect-all').addEventListener('click', function() {
+        overlay.querySelectorAll('.stv-update-check').forEach(function(cb) { cb.checked = false; });
+    });
+    document.getElementById('stv-update-select-missing').addEventListener('click', function() {
+        overlay.querySelectorAll('.stv-update-check').forEach(function(cb) {
+            var wordId = cb.getAttribute('data-word-id');
+            var w = vocabList.find(function(v) { return v.id === wordId; });
+            var hasData = w && w.wordForms && typeof w.wordForms === 'object' && Object.keys(w.wordForms).length > 0;
+            var hasIssues = wordFormsHasIssues(w);
+            cb.checked = !hasData || hasIssues;
+        });
+    });
+
+    // Cancel button
+    document.getElementById('stv-update-cancel').addEventListener('click', function() {
+        shouldCancel = true;
+        this.disabled = true;
+        this.textContent = '중지 중...';
+    });
+
+    // Start update
+    document.getElementById('stv-update-start').addEventListener('click', async function() {
+        var overwrite = document.getElementById('stv-update-overwrite').checked;
+        var selectedIds = [];
+        overlay.querySelectorAll('.stv-update-check:checked').forEach(function(cb) {
+            selectedIds.push(cb.getAttribute('data-word-id'));
+        });
+
+        if (selectedIds.length === 0) {
+            toastr.warning('업데이트할 단어를 선택하세요.');
+            return;
+        }
+
+        isRunning = true;
+        shouldCancel = false;
+        this.style.display = 'none';
+        document.getElementById('stv-update-cancel').style.display = '';
+        document.getElementById('stv-update-progress').style.display = 'flex';
+
+        // Disable checkboxes and selection buttons
+        overlay.querySelectorAll('.stv-update-check').forEach(function(cb) { cb.disabled = true; });
+        document.getElementById('stv-update-select-all').disabled = true;
+        document.getElementById('stv-update-deselect-all').disabled = true;
+        document.getElementById('stv-update-select-missing').disabled = true;
+        document.getElementById('stv-update-overwrite').disabled = true;
+
+        var progressFill = document.getElementById('stv-update-progress-fill');
+        var progressText = document.getElementById('stv-update-progress-text');
+        var total = selectedIds.length;
+        var processed = 0;
+        var updated = 0;
+        var failed = 0;
+
+        for (var i = 0; i < selectedIds.length; i++) {
+            if (shouldCancel) break;
+
+            var wordId = selectedIds[i];
+            var wordEntry = vocabList.find(function(w) { return w.id === wordId; });
+            if (!wordEntry) { processed++; continue; }
+
+            // Highlight current item
+            var currentItem = overlay.querySelector('.stv-update-check[data-word-id="' + wordId + '"]');
+            if (currentItem) currentItem.closest('.stv-update-item').classList.add('stv-update-processing');
+
+            progressText.textContent = (processed + 1) + ' / ' + total;
+            progressFill.style.width = ((processed + 1) / total * 100) + '%';
+
+            try {
+                var result = await analyzeWordWithLLM(wordEntry.word, wordEntry.language);
+                if (result) {
+                    if (overwrite) {
+                        // Overwrite mode: replace all fields with new data
+                        if (result.wordForms) wordEntry.wordForms = result.wordForms;
+                        if (result.baseForm !== undefined) wordEntry.baseForm = result.baseForm;
+                        if (result.reading) wordEntry.reading = result.reading;
+                        if (result.meaning) wordEntry.meaning = result.meaning;
+                        if (result.partOfSpeech) wordEntry.partOfSpeech = result.partOfSpeech;
+                        if (result.grammarInfo !== undefined) wordEntry.grammarInfo = result.grammarInfo;
+                        if (result.examples && result.examples.length > 0) wordEntry.examples = result.examples;
+                    } else {
+                        // Fill-in mode: fill missing fields OR replace wordForms with quality issues
+                        var wfMissing = !wordEntry.wordForms || (typeof wordEntry.wordForms === 'object' && Object.keys(wordEntry.wordForms).length === 0);
+                        var wfBad = wordFormsHasIssues(wordEntry);
+                        if (wfMissing || wfBad) {
+                            wordEntry.wordForms = result.wordForms || {};
+                        }
+                        if (!wordEntry.baseForm && result.baseForm) {
+                            wordEntry.baseForm = result.baseForm;
+                        }
+                        if (!wordEntry.reading && result.reading) {
+                            wordEntry.reading = result.reading;
+                        }
+                        if (!wordEntry.meaning && result.meaning) {
+                            wordEntry.meaning = result.meaning;
+                        }
+                        if (!wordEntry.partOfSpeech && result.partOfSpeech) {
+                            wordEntry.partOfSpeech = result.partOfSpeech;
+                        }
+                        if (!wordEntry.grammarInfo && result.grammarInfo) {
+                            wordEntry.grammarInfo = result.grammarInfo;
+                        }
+                        if ((!wordEntry.examples || wordEntry.examples.length === 0) && result.examples) {
+                            wordEntry.examples = result.examples;
+                        }
+                    }
+                    updated++;
+                    if (currentItem) currentItem.closest('.stv-update-item').classList.add('stv-update-done');
+                } else {
+                    failed++;
+                    if (currentItem) currentItem.closest('.stv-update-item').classList.add('stv-update-failed');
+                }
+            } catch (e) {
+                console.error('[' + MODULE_NAME + '] word update error:', e);
+                failed++;
+                if (currentItem) currentItem.closest('.stv-update-item').classList.add('stv-update-failed');
+            }
+
+            if (currentItem) currentItem.closest('.stv-update-item').classList.remove('stv-update-processing');
+            processed++;
+
+            // Save periodically (every 5 words)
+            if (processed % 5 === 0) {
+                saveSettings();
+            }
+        }
+
+        // Final save
+        saveSettings();
+        isRunning = false;
+
+        progressFill.style.width = '100%';
+        document.getElementById('stv-update-cancel').style.display = 'none';
+
+        var summaryMsg = '완료: ' + updated + '개 업데이트';
+        if (failed > 0) summaryMsg += ', ' + failed + '개 실패';
+        if (shouldCancel) summaryMsg += ' (중지됨)';
+        progressText.textContent = summaryMsg;
+
+        // Rebuild word forms map for highlighting
+        if (typeof buildWordFormsMap === 'function') buildWordFormsMap();
+
+        toastr.success(summaryMsg, '단어 데이터 업데이트');
+    });
+}
+
 // ── Settings Modal ────────────────────────────────────
 
 function showSettingsModal() {
@@ -3381,7 +3676,10 @@ function showSettingsModal() {
             var total = s.vocabList.length;
             var langMap = { ja: '일본어', en: '영어', ko: '한국어', zh: '중국어' };
             var counts = {};
-            s.vocabList.forEach(function(w) { var l = w.language || 'unknown'; counts[l] = (counts[l] || 0) + 1; });
+            s.vocabList.forEach(function(w) {
+                var l = w.language || 'unknown';
+                counts[l] = (counts[l] || 0) + 1;
+            });
             var html = '<div class="stv-stats-block">';
             html += '<div class="stv-stats-total">저장된 단어 <b>' + total + '</b>개</div>';
             if (total > 0) {
@@ -3394,6 +3692,11 @@ function showSettingsModal() {
                 html += '</div>';
             }
             html += '</div>';
+            html += '<div class="stv-setting-row stv-setting-buttons" style="margin-top:10px;">'
+                + '<button id="stv-set-word-update" class="stv-btn stv-btn-save" style="width:100%;justify-content:center;">'
+                + '<span class="fa-solid fa-rotate"></span> 단어 데이터 업데이트'
+                + '</button></div>';
+            html += '<small class="stv-context-hint" style="margin-top:4px;">단어를 선택하여 AI로 재분석 — 활용형, 읽기 등 데이터를 보완하거나 갱신합니다.</small>';
             return html;
         })()
         + '</div>'
@@ -3439,6 +3742,11 @@ function showSettingsModal() {
     document.getElementById('stv-set-remove-all').addEventListener('click', function() {
         removeAllFurigana();
         toastr.info('후리가나가 삭제되었습니다.');
+    });
+
+    // Word data update button
+    document.getElementById('stv-set-word-update').addEventListener('click', function() {
+        showWordUpdateModal();
     });
 
     // Furigana size live preview
