@@ -20,30 +20,30 @@ const furiganaCache = new Map();
 
 // ── Provider map ──────────────────────────────────────
 const PROVIDERS = {
-    openai:       { label: 'OpenAI',              secretKey: 'OPENAI',       source: 'openai' },
-    claude:       { label: 'Claude',              secretKey: 'CLAUDE',       source: 'claude' },
-    google:       { label: 'Google AI Studio',    secretKey: 'MAKERSUITE',   source: 'makersuite' },
-    openrouter:   { label: 'OpenRouter',          secretKey: 'OPENROUTER',   source: 'openrouter' },
-    deepseek:     { label: 'DeepSeek',            secretKey: 'DEEPSEEK',     source: 'deepseek' },
-    cohere:       { label: 'Cohere',              secretKey: 'COHERE',       source: 'cohere' },
-    mistralai:    { label: 'MistralAI',           secretKey: 'MISTRALAI',    source: 'mistralai' },
-    groq:         { label: 'Groq',                secretKey: 'GROQ',         source: 'groq' },
-    xai:          { label: 'xAI (Grok)',          secretKey: 'XAI',          source: 'xai' },
-    perplexity:   { label: 'Perplexity',          secretKey: 'PERPLEXITY',   source: 'perplexity' },
-    ai21:         { label: 'AI21',                secretKey: 'AI21',         source: 'ai21' },
-    fireworks:    { label: 'Fireworks AI',        secretKey: 'FIREWORKS',    source: 'fireworks' },
-    moonshot:     { label: 'Moonshot',            secretKey: 'MOONSHOT',     source: 'moonshot' },
-    siliconflow:  { label: 'SiliconFlow',         secretKey: 'SILICONFLOW',  source: 'siliconflow' },
-    vertexai:     { label: 'Google Vertex AI',    secretKey: 'VERTEXAI',     source: 'vertexai' },
-    azure_openai: { label: 'Azure OpenAI',        secretKey: 'AZURE_OPENAI', source: 'azure_openai' },
-    nanogpt:      { label: 'NanoGPT',             secretKey: 'NANOGPT',      source: 'nanogpt' },
-    electronhub:  { label: 'ElectronHub',         secretKey: 'ELECTRONHUB',  source: 'electronhub' },
-    chutes:       { label: 'Chutes',              secretKey: 'CHUTES',       source: 'chutes' },
-    aimlapi:      { label: 'AIML API',            secretKey: 'AIMLAPI',      source: 'aimlapi' },
-    pollinations: { label: 'Pollinations',        secretKey: 'POLLINATIONS', source: 'pollinations' },
-    cometapi:     { label: 'Comet API',           secretKey: 'COMETAPI',     source: 'cometapi' },
-    zai:          { label: 'ZAI',                 secretKey: 'ZAI',          source: 'zai' },
-    custom:       { label: 'Custom (OpenAI 호환)', secretKey: 'CUSTOM',       source: 'custom' },
+    openai: { label: 'OpenAI', secretKey: 'OPENAI', source: 'openai' },
+    claude: { label: 'Claude', secretKey: 'CLAUDE', source: 'claude' },
+    google: { label: 'Google AI Studio', secretKey: 'MAKERSUITE', source: 'makersuite' },
+    openrouter: { label: 'OpenRouter', secretKey: 'OPENROUTER', source: 'openrouter' },
+    deepseek: { label: 'DeepSeek', secretKey: 'DEEPSEEK', source: 'deepseek' },
+    cohere: { label: 'Cohere', secretKey: 'COHERE', source: 'cohere' },
+    mistralai: { label: 'MistralAI', secretKey: 'MISTRALAI', source: 'mistralai' },
+    groq: { label: 'Groq', secretKey: 'GROQ', source: 'groq' },
+    xai: { label: 'xAI (Grok)', secretKey: 'XAI', source: 'xai' },
+    perplexity: { label: 'Perplexity', secretKey: 'PERPLEXITY', source: 'perplexity' },
+    ai21: { label: 'AI21', secretKey: 'AI21', source: 'ai21' },
+    fireworks: { label: 'Fireworks AI', secretKey: 'FIREWORKS', source: 'fireworks' },
+    moonshot: { label: 'Moonshot', secretKey: 'MOONSHOT', source: 'moonshot' },
+    siliconflow: { label: 'SiliconFlow', secretKey: 'SILICONFLOW', source: 'siliconflow' },
+    vertexai: { label: 'Google Vertex AI', secretKey: 'VERTEXAI', source: 'vertexai' },
+    azure_openai: { label: 'Azure OpenAI', secretKey: 'AZURE_OPENAI', source: 'azure_openai' },
+    nanogpt: { label: 'NanoGPT', secretKey: 'NANOGPT', source: 'nanogpt' },
+    electronhub: { label: 'ElectronHub', secretKey: 'ELECTRONHUB', source: 'electronhub' },
+    chutes: { label: 'Chutes', secretKey: 'CHUTES', source: 'chutes' },
+    aimlapi: { label: 'AIML API', secretKey: 'AIMLAPI', source: 'aimlapi' },
+    pollinations: { label: 'Pollinations', secretKey: 'POLLINATIONS', source: 'pollinations' },
+    cometapi: { label: 'Comet API', secretKey: 'COMETAPI', source: 'cometapi' },
+    zai: { label: 'ZAI', secretKey: 'ZAI', source: 'zai' },
+    custom: { label: 'Custom (OpenAI 호환)', secretKey: 'CUSTOM', source: 'custom' },
 };
 
 const DEFAULT_MODELS = {
@@ -129,13 +129,13 @@ function showFuriganaProgressSnackbar(mesId, label) {
     document.body.appendChild(snackbar);
     snackbar.showPopover();
     // Double rAF ensures the initial hidden state is painted before showing
-    requestAnimationFrame(function() {
-        requestAnimationFrame(function() {
+    requestAnimationFrame(function () {
+        requestAnimationFrame(function () {
             snackbar.classList.add('stv-snackbar-show');
         });
     });
 
-    snackbar.querySelector('.stv-snackbar-stop').addEventListener('click', function() {
+    snackbar.querySelector('.stv-snackbar-stop').addEventListener('click', function () {
         var ctrl = furiganaAbortControllers.get(String(mesId));
         if (ctrl) {
             ctrl.abort();
@@ -153,8 +153,8 @@ function hideFuriganaProgressSnackbar() {
     if (el) {
         el.classList.remove('stv-snackbar-show');
         el.classList.add('stv-snackbar-hide');
-        setTimeout(function() {
-            try { el.hidePopover(); } catch(e) {}
+        setTimeout(function () {
+            try { el.hidePopover(); } catch (e) { }
             el.remove();
         }, 300);
     }
@@ -200,7 +200,7 @@ function formatDate(iso) {
 /** Convert katakana characters in a string to hiragana. */
 function katakanaToHiragana(str) {
     if (!str) return str;
-    return str.replace(/[\u30A1-\u30F6]/g, function(ch) {
+    return str.replace(/[\u30A1-\u30F6]/g, function (ch) {
         return String.fromCharCode(ch.charCodeAt(0) - 0x60);
     });
 }
@@ -255,7 +255,7 @@ function getCurrentChatId() {
 /** Get text content from an element, excluding ruby annotation (rt/rp). */
 function getCleanText(element) {
     var clone = element.cloneNode(true);
-    clone.querySelectorAll('rt, rp').forEach(function(el) { el.remove(); });
+    clone.querySelectorAll('rt, rp').forEach(function (el) { el.remove(); });
     return clone.textContent || '';
 }
 
@@ -264,7 +264,7 @@ function getCleanSelectedText(selection) {
     if (!selection || selection.rangeCount === 0) return selection ? selection.toString().trim() : '';
     var range = selection.getRangeAt(0);
     var fragment = range.cloneContents();
-    fragment.querySelectorAll('rt, rp').forEach(function(el) { el.remove(); });
+    fragment.querySelectorAll('rt, rp').forEach(function (el) { el.remove(); });
     return (fragment.textContent || '').trim();
 }
 
@@ -377,7 +377,7 @@ async function getLLMFurigana(text, signal) {
         const match = resp.match(/\[[\s\S]*?\]/);
         if (!match) return [];
         const readings = JSON.parse(match[0]);
-        const valid = readings.filter(function(r) { return r && typeof r.word === 'string' && typeof r.reading === 'string'; });
+        const valid = readings.filter(function (r) { return r && typeof r.word === 'string' && typeof r.reading === 'string'; });
         furiganaCache.set(key, valid);
         return valid;
     } catch (e) {
@@ -398,7 +398,7 @@ function applyFuriganaToElement(element, readings, force) {
     var includeKatakana = getSettings().showKatakanaFurigana;
 
     const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT, {
-        acceptNode: function(node) {
+        acceptNode: function (node) {
             let parent = node.parentNode;
             while (parent && parent !== element) {
                 if (SKIP_TAGS.has(parent.tagName)) return NodeFilter.FILTER_REJECT;
@@ -426,7 +426,7 @@ function applyFuriganaToElement(element, readings, force) {
     }
 
     // Sort by word length descending (longer words first)
-    unique.sort(function(a, b) { return b.word.length - a.word.length; });
+    unique.sort(function (a, b) { return b.word.length - a.word.length; });
 
     // Build placeholder map
     var placeholders = [];
@@ -461,7 +461,7 @@ function applyFuriganaToElement(element, readings, force) {
             var vocabWords = new Set();
             var formsMapLocal = null;
             if (settings2.highlightVocab) {
-                settings2.vocabList.forEach(function(w) { vocabWords.add(w.word); });
+                settings2.vocabList.forEach(function (w) { vocabWords.add(w.word); });
                 if (settings2.highlightWordForms) {
                     formsMapLocal = buildWordFormsMap();
                 }
@@ -497,29 +497,29 @@ function highlightVocabInElement(element) {
     if (!settings.highlightVocab || !settings.vocabList || settings.vocabList.length === 0) return;
 
     // Build sorted word list (longest first to avoid partial matches)
-    var savedWordsSet = new Set(settings.vocabList.map(function(w) { return w.word; }));
-    var vocabWords = settings.vocabList.map(function(w) { return w.word; })
-        .filter(function(w) { return w && w.length > 0; });
+    var savedWordsSet = new Set(settings.vocabList.map(function (w) { return w.word; }));
+    var vocabWords = settings.vocabList.map(function (w) { return w.word; })
+        .filter(function (w) { return w && w.length > 0; });
 
     // Build forms map for highlighting conjugated forms
     var formsMap = null;
     if (settings.highlightWordForms) {
         formsMap = buildWordFormsMap();
         // Add form words to the highlight list (if not already a saved word)
-        Object.keys(formsMap).forEach(function(formWord) {
+        Object.keys(formsMap).forEach(function (formWord) {
             if (!savedWordsSet.has(formWord)) {
                 vocabWords.push(formWord);
             }
         });
     }
 
-    vocabWords = vocabWords.filter(function(w) { return w && w.length > 0; })
-        .sort(function(a, b) { return b.length - a.length; });
+    vocabWords = vocabWords.filter(function (w) { return w && w.length > 0; })
+        .sort(function (a, b) { return b.length - a.length; });
     if (vocabWords.length === 0) return;
 
     // Collect text nodes NOT inside ruby/highlight elements
     var walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT, {
-        acceptNode: function(node) {
+        acceptNode: function (node) {
             var parent = node.parentNode;
             while (parent && parent !== element) {
                 if (SKIP_TAGS.has(parent.tagName)) return NodeFilter.FILTER_REJECT;
@@ -557,7 +557,7 @@ function highlightVocabInElement(element) {
             // Case-insensitive for Latin-script words
             var flags = needsWordBoundary(vw) ? 'gi' : 'g';
             var pattern = new RegExp(patternStr, flags);
-            text = text.replace(pattern, function(match) {
+            text = text.replace(pattern, function (match) {
                 changed = true;
                 var idx = placeholders.length;
                 placeholders.push({ word: vw, matched: match });
@@ -596,7 +596,7 @@ function highlightVocabInElement(element) {
  */
 function highlightVocabAcrossNodes(element, vocabWords, formsMap, savedWordsSet) {
     if (!element.querySelector('.stv-ruby')) return;
-    var vocabMulti = vocabWords.filter(function(w) { return w.length > 1; });
+    var vocabMulti = vocabWords.filter(function (w) { return w.length > 1; });
     if (vocabMulti.length === 0) return;
 
     var maxPasses = 10;
@@ -647,7 +647,7 @@ function _matchVocabInWrapper(wrapper, vocabWords, formsMap, savedWordsSet) {
         }
     }
     if (segments.length < 2) return false;
-    var fullText = segments.map(function(s) { return s.text; }).join('');
+    var fullText = segments.map(function (s) { return s.text; }).join('');
 
     for (var vi = 0; vi < vocabWords.length; vi++) {
         var vw = vocabWords[vi];
@@ -662,7 +662,7 @@ function _matchVocabInWrapper(wrapper, vocabWords, formsMap, savedWordsSet) {
             }
         }
         if (matchedIdxs.length < 2) continue;
-        if (matchedIdxs.some(function(i) { return segments[i].type === 'hl'; })) continue;
+        if (matchedIdxs.some(function (i) { return segments[i].type === 'hl'; })) continue;
 
         var firstSeg = segments[matchedIdxs[0]];
         var lastSeg = segments[matchedIdxs[matchedIdxs.length - 1]];
@@ -732,7 +732,7 @@ async function processMsgFurigana(mesId) {
         // Furigana flag is set but ruby elements are gone (e.g. LLM translation replaced DOM)
         // Try to reapply from stored readings
         var cachedReadings = null;
-        try { cachedReadings = JSON.parse(messageEl.dataset.stvFuriganaReadings || 'null'); } catch (_) {}
+        try { cachedReadings = JSON.parse(messageEl.dataset.stvFuriganaReadings || 'null'); } catch (_) { }
         if (cachedReadings && Array.isArray(cachedReadings) && cachedReadings.length > 0) {
             if (mesTextCheck) {
                 mesTextCheck.dataset.stvOriginalHtml = mesTextCheck.innerHTML;
@@ -858,7 +858,7 @@ function removeFuriganaFromMessage(messageEl) {
  * Remove all furigana from all messages
  */
 function removeAllFurigana() {
-    document.querySelectorAll('#chat .mes').forEach(function(msg) { removeFuriganaFromMessage(msg); });
+    document.querySelectorAll('#chat .mes').forEach(function (msg) { removeFuriganaFromMessage(msg); });
     // Also clear persistent data for current chat
     try {
         var ctx = getContext();
@@ -938,7 +938,7 @@ function reapplyAllStoredFurigana() {
     var chatData = getFuriganaStore();
     if (!chatData) return;
 
-    Object.keys(chatData).forEach(function(mesId) {
+    Object.keys(chatData).forEach(function (mesId) {
         var mesEl = document.querySelector('#chat .mes[mesid="' + mesId + '"]');
         if (!mesEl) return;
         if (mesEl.dataset.stvFurigana === 'done') return;
@@ -1070,14 +1070,14 @@ function getVocab() {
  */
 function buildWordFormsMap() {
     var vocab = getVocab();
-    var savedWords = new Set(vocab.map(function(w) { return w.word; }));
+    var savedWords = new Set(vocab.map(function (w) { return w.word; }));
     var formsMap = {}; // formWord → { baseWordId, baseWord, baseVocabWord }
-    vocab.forEach(function(w) {
+    vocab.forEach(function (w) {
         if (!w.wordForms || typeof w.wordForms !== 'object') return;
-        Object.keys(w.wordForms).forEach(function(groupLabel) {
+        Object.keys(w.wordForms).forEach(function (groupLabel) {
             var forms = w.wordForms[groupLabel];
             if (!Array.isArray(forms)) return;
-            forms.forEach(function(form) {
+            forms.forEach(function (form) {
                 var formWord = form.word || '';
                 if (!formWord || formWord === w.word) return;
                 // Don't overwrite if this form is a separately saved vocab word
@@ -1091,6 +1091,374 @@ function buildWordFormsMap() {
     return formsMap;
 }
 
+// ── Built-in Grammar Explanations ─────────────────────
+// Maps grammar form keywords → Korean descriptions for modal display.
+// Keys use the Korean-localized labels matching LLM prompt output.
+
+const GRAMMAR_EXPLANATIONS = {
+    // ── 6활용형 (학교문법) ──
+    '미연형': {
+        name: '未然形',
+        description: '아직 일어나지 않은 상태를 나타내는 활용형.\n부정(ない), 수동(れる/られる), 사역(せる/させる) 등의 조동사가 접속한다.',
+        formation: '• 五段동사: 어미를 あ단으로 변환\n  書く → 書か(ない), 飲む → 飲ま(ない)\n• 一段동사: る를 제거\n  食べる → 食べ(ない), 見る → 見(ない)\n• 불규칙: する → し(ない), くる → こ(ない)',
+        usage: '• 부정: 書かない (쓰지 않다)\n• 수동: 書かれる (쓰이다)\n• 사역: 書かせる (쓰게 하다)',
+    },
+    '연용형': {
+        name: '連用形',
+        description: 'ます형, て형, た형의 기반이 되는 핵심 활용형.\n동사의 연용형은 그 자체로 명사화되기도 한다 (예: 休み=쉼/휴가).',
+        formation: '• 五段동사: 어미를 い단으로 변환\n  書く → 書き, 飲む → 飲み, 走る → 走り\n• 一段동사: る를 제거\n  食べる → 食べ, 見る → 見\n• 불규칙: する → し, くる → き',
+        usage: '• ます 접속: 書きます (씁니다)\n• 명사화: 休み (쉼/휴가), 始まり (시작)\n• 복합동사: 飛び出す (뛰어나가다)\n• 중지법: 朝起き、顔を洗った (아침에 일어나, 세수했다)',
+    },
+    '종지형': {
+        name: '終止形',
+        description: '문장을 끝맺는 형태. 사전에 실리는 기본형(사전형)과 동일하다.\n현대 일본어에서는 연체형과 형태가 같다.',
+        formation: '• 동사: 사전형 그대로\n  書く, 食べる, する, くる\n• い형용사: 美しい, 高い\n• な형용사: 静かだ, きれいだ',
+        usage: '• 문장 종결: 私は本を読む。 (나는 책을 읽는다.)\n• ~と思う 앞: 行くと思う (갈 거라 생각하다)',
+    },
+    '연체형': {
+        name: '連体形',
+        description: '체언(명사)을 수식하는 활용형.\n현대 일본어에서 종지형과 형태가 동일하지만, な형용사와 명사에서는 다르다.',
+        formation: '• 동사: 종지형과 동일\n  書く(人), 食べる(もの)\n• い형용사: 美しい(花)\n• な형용사: 静かな(夜)  ← だ가 な으로 변화',
+        usage: '• 명사 수식: 読む本 (읽는 책)\n• ~のだ/~のです: 行くのです (가는 것입니다)\n• ~ことができる: 泳ぐことができる (수영할 수 있다)',
+    },
+    '가정형': {
+        name: '仮定形',
+        description: '조건을 나타내는 조사 ば가 접속하는 활용형.\n「~하면」이라는 가정 조건을 표현한다.',
+        formation: '• 五段동사: 어미를 え단으로 변환 + ば\n  書く → 書けば, 飲む → 飲めば\n• 一段동사: る → れば\n  食べる → 食べれば, 見る → 見れば\n• い형용사: い → ければ\n  高い → 高ければ\n• 불규칙: する → すれば, くる → くれば',
+        usage: '• 조건: 勉強すれば合格する (공부하면 합격한다)\n• 가정: もっと早く起きれば、間に合った (더 일찍 일어났으면 맞았을 텐데)',
+    },
+    '명령형': {
+        name: '命令形',
+        description: '상대에게 직접 명령하는 활용형.\n일상 회화에서는 거칠게 들리므로 주의가 필요하다.',
+        formation: '• 五段동사: 어미를 え단으로 변환\n  書く → 書け, 飲む → 飲め, 走る → 走れ\n• 一段동사: る → ろ (또는 よ)\n  食べる → 食べろ, 見る → 見ろ\n• 불규칙: する → しろ/せよ, くる → こい',
+        usage: '• 직접 명령: 立て! (일어서!)\n• 응원: 頑張れ! (힘내!)\n• 표지판: 止まれ (멈춰라)',
+    },
+
+    // ── 접속·활용형 ──
+    'て형': {
+        name: 'て形',
+        description: '동작의 연결, 요청, 진행, 원인 등 다양한 용법을 갖는 활용형.\n연용형 기반으로 て/で가 붙는다.',
+        formation: '• 五段 음편 변화:\n  く → いて (書く→書いて), ぐ → いで (泳ぐ→泳いで)\n  す → して (話す→話して)\n  む/ぶ/ぬ → んで (飲む→飲んで, 遊ぶ→遊んで)\n  る/つ/う → って (走る→走って, 待つ→待って)\n• 一段: る → て  (食べる→食べて)\n• 불규칙: する→して, くる→きて, 行く→行って',
+        usage: '• 연결: 食べて寝る (먹고 자다)\n• 요청: 教えてください (가르쳐 주세요)\n• 진행: 食べている (먹고 있다)\n• 원인: 嬉しくて泣いた (기뻐서 울었다)',
+    },
+    'た형': {
+        name: 'た形',
+        description: '과거·완료를 나타내는 활용형.\nて형과 같은 음편 규칙을 따르며, て→た, で→だ로 바꾸면 된다.',
+        formation: '• て형의 て→た, で→だ:\n  書いて → 書いた, 飲んで → 飲んだ\n  食べて → 食べた, して → した',
+        usage: '• 과거: 昨日、本を読んだ (어제 책을 읽었다)\n• 완료: もう食べた (이미 먹었다)\n• 경험: 行ったことがある (간 적이 있다)\n• 발견: あ、ここにあった！ (아, 여기 있었네!)',
+    },
+    'ます형': {
+        name: 'ます形',
+        description: '정중체(です·ます체)를 만드는 활용형.\n연용형에 ます를 붙인 형태이다.',
+        formation: '• 연용형 + ます:\n  書く → 書きます, 飲む → 飲みます\n  食べる → 食べます, する → します, くる → きます',
+        usage: '• 정중: 毎日勉強します (매일 공부합니다)\n• 과거 정중: 昨日行きました (어제 갔습니다)\n• 부정 정중: 食べません (먹지 않습니다)\n• 의지 정중: 行きましょう (갑시다)',
+    },
+    'ない형': {
+        name: 'ない形',
+        description: '동사의 부정형. 미연형에 ない를 붙인 형태이다.\nない 자체가 い형용사처럼 활용한다.',
+        formation: '• 미연형 + ない:\n  書く → 書かない, 飲む → 飲まない\n  食べる → 食べない, する → しない, くる → こない\n• 특수: ある → ない (あらない ✗)',
+        usage: '• 부정: 食べない (먹지 않는다)\n• 부정 과거: 食べなかった (먹지 않았다)\n• ~なければならない: 行かなければならない (가지 않으면 안 된다)\n• ~ないでください: 触らないでください (만지지 마세요)',
+    },
+    'ば형': {
+        name: 'ば形',
+        description: '가정 조건 「~하면」을 나타내는 형태.\n가정형에 ば를 붙인 것이다.',
+        formation: '• 가정형 + ば:\n  書く → 書けば, 食べる → 食べれば\n  する → すれば, くる → くれば\n• い형용사: 高い → 高ければ\n• ない: なければ',
+        usage: '• 가정: 安ければ買う (싸면 산다)\n• 격언: 塵も積もれば山となる (티끌 모아 태산)\n• 후회: あの時行けばよかった (그때 갔으면 좋았을 텐데)',
+    },
+    '수동형': {
+        name: '受身形',
+        description: '동작을 받는 쪽의 입장에서 말하는 수동 표현.\n미연형에 れる/られる를 붙인다.',
+        formation: '• 五段동사: 미연형 + れる\n  書く → 書かれる, 飲む → 飲まれる\n• 一段동사: 미연형 + られる\n  食べる → 食べられる, 見る → 見られる\n• 불규칙: する → される, くる → こられる',
+        usage: '• 직접 수동: 先生に褒められた (선생님에게 칭찬받았다)\n• 간접 수동 (피해): 雨に降られた (비를 맞았다)\n• 존경 표현으로도 사용: 先生が読まれた (선생님이 읽으셨다)',
+    },
+    '사역형': {
+        name: '使役形',
+        description: '다른 사람에게 동작을 시키거나 허용하는 사역 표현.\n미연형에 せる/させる를 붙인다.',
+        formation: '• 五段동사: 미연형 + せる\n  書く → 書かせる, 飲む → 飲ませる\n• 一段동사: 미연형 + させる\n  食べる → 食べさせる, 見る → 見させる\n• 불규칙: する → させる, くる → こさせる',
+        usage: '• 강제: 子供に野菜を食べさせる (아이에게 채소를 먹게 하다)\n• 허용: 好きにさせてあげる (하고 싶은 대로 하게 해주다)\n• 감정 사역: 泣かせる (울게 하다)',
+    },
+    '사역수동': {
+        name: '使役受身形',
+        description: '사역+수동이 결합된 형태. 「(억지로) ~하게 되다」의 의미.\n사역형에 수동 접미사가 붙는다.',
+        formation: '• 五段동사: 미연형 + される (축약형)\n  書く → 書かされる, 飲む → 飲まされる\n  ※「す」로 끝나는 동사는 축약 불가 (話す → 話させられる)\n• 一段동사: させられる\n  食べる → 食べさせられる\n• 불규칙: する → させられる, くる → こさせられる',
+        usage: '• 嫌いな野菜を食べさせられた\n  (싫어하는 채소를 억지로 먹게 되었다)\n• 毎日走らされる\n  (매일 (억지로) 뛰게 된다)',
+    },
+    '가능형': {
+        name: '可能形',
+        description: '「~할 수 있다」의 능력·가능을 나타내는 형태.',
+        formation: '• 五段동사: 어미를 え단으로 변환 + る\n  書く → 書ける, 飲む → 飲める, 読む → 読める\n• 一段동사: られる (= 수동형과 동형)\n  食べる → 食べられる (구어에선 食べれる)\n• 불규칙: する → できる, くる → こられる (これる)',
+        usage: '• 능력: 日本語が話せる (일본어를 할 수 있다)\n• 상황: 今日は早く帰れる (오늘은 일찍 돌아갈 수 있다)\n• ら抜き: 食べれる (※구어체 전용. 공식 문서나 시험에서는 食べられる가 정답)',
+    },
+    '의향형': {
+        name: '意向形',
+        description: '의지(~하겠다)나 권유(~하자)를 나타내는 형태.',
+        formation: '• 五段동사: 어미를 お단으로 변환 + う\n  書く → 書こう, 飲む → 飲もう\n• 一段동사: る → よう\n  食べる → 食べよう, 見る → 見よう\n• 불규칙: する → しよう, くる → こよう',
+        usage: '• 의지: 明日からがんばろう (내일부터 열심히 하겠다)\n• 권유: 一緒に行こう (같이 가자)\n• ~としている: 出ようとしている (나가려 하고 있다)',
+    },
+
+    // ── 형용사 활용 ──
+    'い형용사': {
+        name: 'イ形容詞',
+        description: 'い형용사(형용사)는 어미 い가 변화하며 활용한다.\nない도 い형용사의 일종이므로 같은 규칙을 따른다.',
+        formation: '• 부정: い → くない  (高い → 高くない)\n• 과거: い → かった  (高い → 高かった)\n• 부정과거: い → くなかった\n• て형: い → くて  (高い → 高くて)\n• 연용형: い → く  (高い → 高く)\n• 가정: い → ければ  (高い → 高ければ)',
+        usage: '• この本は高い (이 책은 비싸다)\n• 高くない (비싸지 않다)\n• 高かった (비쌌다)\n• 高くて買えない (비싸서 살 수 없다)',
+    },
+    'な형용사': {
+        name: 'ナ形容詞 (형용동사)',
+        description: 'な형용사(형용동사)는 명사를 수식할 때 な가 붙고, だ를 기반으로 활용한다.',
+        formation: '• 명사 수식: な  (静かな夜)\n• 부정: ではない/じゃない  (静かではない)\n• 과거: だった  (静かだった)\n• て형: で  (静かで)\n• 연용형: に  (静かに)\n• ~そう (양태): 静かそうだ',
+        usage: '• 静かな部屋 (조용한 방)\n• 元気じゃない (건강하지 않다)\n• きれいだった (예뻤다)\n• 静かにしてください (조용히 해주세요)',
+    },
+
+    // ── 기타 중요 문법형 ──
+    '명사화': {
+        name: '名詞化',
+        description: '동사나 형용사를 명사로 바꾸는 문법.',
+        formation: '• ~こと: 가장 일반적인 명사화\n  読むこと (읽는 것), 走ること (뛰는 것)\n• ~の: 구어에서 자주 사용\n  走るのが好き (뛰는 게 좋다)\n• 연용형 명사: 동사의 연용형이 명사로 굳어진 것\n  休み (쉼/휴가), 話 (이야기)',
+        usage: '• 読むことが大切だ (읽는 것이 중요하다)\n• 食べるのをやめた (먹는 것을 그만두었다)\n• 泳ぎが上手だ (수영을 잘한다)\n• ※팁: 見る/聞く/手伝う 앞에서는 「の」만 사용 (走っているのを見た)',
+    },
+    '존경어': {
+        name: '尊敬語',
+        description: '상대나 제3자의 행동을 높여 말하는 경어 표현.',
+        formation: '• お + 연용형 + になる:\n  読む → お読みになる\n• 수동형으로 존경:\n  読む → 読まれる\n• 특수 존경어:\n  いる → いらっしゃる, 食べる → 召し上がる\n  言う → おっしゃる, 行く/来る → いらっしゃる',
+        usage: '• 先生がお読みになった (선생님이 읽으셨다)\n• 社長が来られました (사장님이 오셨습니다)\n• 何を召し上がりますか (무엇을 드시겠습니까)',
+    },
+    '겸양어': {
+        name: '謙譲語',
+        description: '자신이나 자기 쪽의 행동을 낮추어 상대를 높이는 경어 표현.',
+        formation: '• お + 연용형 + する/いたす:\n  読む → お読みする/お読みいたす\n• 특수 겸양어:\n  行く/来る → 参る, 食べる → いただく\n  言う → 申す, 見る → 拝見する\n  もらう → いただく, する → いたす',
+        usage: '• 荷物をお持ちします (짐을 들어드리겠습니다)\n• 明日参ります (내일 찾아뵙겠습니다)\n• 拝見しました (보았습니다 — 겸양)',
+    },
+    '진행형': {
+        name: '~ている',
+        description: '동작의 진행, 결과 상태의 지속, 반복 습관을 나타낸다.',
+        formation: '• て형 + いる:\n  食べている (먹고 있다)\n  知っている (알고 있다)\n• 구어 축약: ~てる\n  食べてる, 知ってる',
+        usage: '• 진행: 今食べている (지금 먹고 있다)\n• 상태: 結婚している (결혼한 상태이다)\n• 습관: 毎日走っている (매일 뛰고 있다)\n• 경험 결과: もう読んでいる (이미 읽어 놓았다)',
+    },
+    '과거형': {
+        name: '過去形',
+        description: 'た형과 동일. 과거 또는 완료를 나타낸다.',
+        formation: 'た형 참조.\n• 정중체: ~ました (食べました)\n• 부정 과거: ~なかった (食べなかった)\n• 정중 부정 과거: ~ませんでした (食べませんでした)',
+        usage: '• 昨日映画を見た (어제 영화를 봤다)\n• もう終わった (이미 끝났다)',
+    },
+    '부정형': {
+        name: '否定形',
+        description: 'ない형과 동일. 동작이나 상태의 부정을 나타낸다.',
+        formation: 'ない형 참조.\n• 부정 의지: ~まい (行くまい)\n• 고어 부정: ~ず (知らず = 모르고)',
+        usage: '• 今日は行かない (오늘은 가지 않는다)\n• 知らず知らず (모르는 사이에)',
+    },
+
+    // ── 조건·기타 형태 ──
+    'たら형': {
+        name: 'たら形',
+        description: '「~하면/~했더니」의 조건·가정을 나타내는 형태.\nた형에 ら를 붙인 것이다.',
+        formation: '• た형 + ら:\n  書いた → 書いたら, 食べた → 食べたら\n  した → したら, 高かった → 高かったら',
+        usage: '• 가정: 雨が降ったら行かない (비가 오면 안 간다)\n• 발견: 窓を開けたら猫がいた (창문을 열었더니 고양이가 있었다)',
+    },
+    'と형': {
+        name: 'と 조건형',
+        description: '종지형에 と를 붙여 「~하면 (필연적으로)」의 의미를 나타낸다.\n자연법칙이나 반복적 사실에 자주 사용.',
+        formation: '• 종지형 + と:\n  押す → 押すと, 春になる → 春になると',
+        usage: '• 법칙: ボタンを押すと音が鳴る (버튼을 누르면 소리가 난다)\n• 자연현상: 春になると花が咲く (봄이 되면 꽃이 핀다)',
+    },
+    '금지형': {
+        name: '禁止形',
+        description: '「~하지 마(라)」의 부정 명령을 나타내는 형태.\n종지형(사전형)에 な를 붙인다.',
+        formation: '• 종지형 + な:\n  書く → 書くな, 食べる → 食べるな\n  する → するな, くる → くるな',
+        usage: '• 직접 금지: 触るな! (만지지 마!)\n• 응원: 諦めるな! (포기하지 마!)\n• 표지판: 入るな (들어가지 마라)',
+    },
+    'なら형': {
+        name: 'なら 조건형',
+        description: '상대의 말을 받아치거나 주제를 한정할 때 쓰는 조건 표현.\n「~라면/~라고 한다면」의 의미.',
+        formation: '• 종지형/명사/な형용사 + なら:\n  行く → 行くなら, 学生 → 学生なら\n  静か → 静かなら',
+        usage: '• 주제 한정: 東京に行くなら、新幹線がいい (도쿄에 간다면, 신칸센이 좋다)\n• 상대 말 수용: 暇なら手伝って (한가하다면 도와줘)',
+    },
+};
+
+// ── Built-in Verb Group Explanations ──────────────────
+const VERB_GROUP_EXPLANATIONS = {
+    '五段': {
+        name: '5단 동사',
+        description: '어미가 う단(う/く/す/つ/ぬ/ぶ/む/る/ぐ)으로 끝나는 동사.\n활용 시 어미가 あ/い/う/え/お의 5단으로 변화한다.',
+        rules: [
+            '• 미연형: う단 → あ단 + ない (書く → 書かない)',
+            '• 연용형: う단 → い단 + ます (書く → 書きます)',
+            '• て형: 음편 변화 (書く → 書いて, 飲む → 飲んで) ※예외: 行く → 行って',
+            '• 가정형: う단 → え단 + ば (書く → 書けば)',
+            '• 명령형: う단 → え단 (書く → 書け)'
+        ],
+        examples: '書く, 読む, 走る, 買う, 話す, 泳ぐ, 待つ, 死ぬ, 遊ぶ',
+        tip: '「~る」로 끝나도 る 앞의 모음이 あ/う/お단이면 반드시 五段 (例: 分かる, 作る, 通る).\nい/え단이라도 五段인 예외가 있으므로 주의 (例: 走る, 帰る, 知る, 切る)'
+    },
+    '一段': {
+        name: '1단 동사',
+        description: '어미가 항상 「る」로 끝나며, る 앞의 모음이 い단 또는 え단인 동사.\n활용 시 る를 떼고 접미사를 붙이므로, 어간이 변하지 않는다.',
+        rules: [
+            '• 미연형: る → ない (食べる → 食べない)',
+            '• 연용형: る → ます (食べる → 食べます)',
+            '• て형: る → て (食べる → 食べて)',
+            '• 가정형: る → れば (食べる → 食べれば)',
+            '• 명령형: る → ろ/よ (食べる → 食べろ)'
+        ],
+        examples: '食べる, 見る, 起きる, 寝る, 開ける, 教える, 落ちる',
+        tip: '上一段(い단): 見る, 起きる, 降りる\n下一段(え단): 食べる, 教える, 出る'
+    },
+    'サ変': {
+        name: 'する 동사 (サ변 불규칙 활용)',
+        description: '「する」및 「~する」형태의 동사.\n한자어+する 형태가 가장 많다 (勉強する, 運動する 등).',
+        rules: [
+            '• 미연형: し/せ/さ (しない, させる, される)',
+            '• 연용형: し (します, して)',
+            '• 가정형: すれば',
+            '• 명령형: しろ(구어체) / せよ(문어체)'
+        ],
+        examples: 'する, 勉強する, 運動する, 料理する, 旅行する, 心配する',
+        tip: '한자어(勉強), 외래어(コピー), 상태 명사(音, 匂い) 등에 + する가 붙는 형태는 모두 サ변에 해당'
+    },
+    'カ変': {
+        name: 'くる 동사 (カ변 불규칙 활용)',
+        description: '「来る(くる)」한 단어만 해당하는 특수 활용.\n어간(来=く/き/こ)이 불규칙하게 변화한다.',
+        rules: [
+            '• 미연형: 来(こ)ない',
+            '• 연용형: 来(き)ます, 来(き)て',
+            '• 종지형: 来(く)る',
+            '• 가정형: 来(く)れば',
+            '• 명령형: 来(こ)い'
+        ],
+        examples: '来る (및 복합어: 持ってくる, 連れてくる)',
+        tip: '일본어에서 유일한 カ변 동사'
+    }
+};
+
+/**
+ * Show a read-only modal with verb group explanation.
+ */
+function showVerbGroupInfoModal(group) {
+    var existing = document.getElementById('stv-grammar-modal-overlay');
+    if (existing) existing.remove();
+
+    var info = VERB_GROUP_EXPLANATIONS[group];
+
+    var overlay = document.createElement('div');
+    overlay.id = 'stv-grammar-modal-overlay';
+    overlay.className = 'stv-dialog-overlay';
+
+    if (!info) {
+        overlay.innerHTML = '<div class="stv-dialog stv-grammar-modal">'
+            + '<div class="stv-dialog-header"><h3>동사 그룹 정보</h3>'
+            + '<button class="stv-btn stv-btn-icon stv-dialog-close"><span class="fa-solid fa-xmark"></span></button></div>'
+            + '<div class="stv-dialog-body"><p>' + escapeHtml(group) + '에 대한 상세 정보가 없습니다.</p></div>'
+            + '<div class="stv-dialog-footer"><button class="stv-btn stv-btn-cancel stv-grammar-close">닫기</button></div></div>';
+    } else {
+        var rulesText = info.rules.join('\n');
+        overlay.innerHTML = '<div class="stv-dialog stv-grammar-modal">'
+            + '<div class="stv-dialog-header"><h3>동사 그룹 정보</h3>'
+            + '<button class="stv-btn stv-btn-icon stv-dialog-close"><span class="fa-solid fa-xmark"></span></button></div>'
+            + '<div class="stv-dialog-body">'
+            + '<span class="stv-verb-group-badge stv-verb-group-' + group + '">' + escapeHtml(group) + '</span>'
+            + '<h4 class="stv-grammar-name">' + escapeHtml(info.name) + '</h4>'
+            + '<div class="stv-grammar-section">'
+            + '<div class="stv-grammar-section-title">설명</div>'
+            + '<div class="stv-grammar-section-body">' + escapeHtml(info.description).replace(/\n/g, '<br>') + '</div></div>'
+            + '<div class="stv-grammar-section">'
+            + '<div class="stv-grammar-section-title">활용 규칙</div>'
+            + '<pre class="stv-grammar-formation">' + escapeHtml(rulesText) + '</pre></div>'
+            + '<div class="stv-grammar-section">'
+            + '<div class="stv-grammar-section-title">대표 동사</div>'
+            + '<div class="stv-grammar-section-body">' + escapeHtml(info.examples) + '</div></div>'
+            + (info.tip ? '<div class="stv-grammar-section"><div class="stv-grammar-section-title">팁</div><div class="stv-grammar-section-body">' + escapeHtml(info.tip).replace(/\n/g, '<br>') + '</div></div>' : '')
+            + '</div>'
+            + '<div class="stv-dialog-footer"><button class="stv-btn stv-btn-cancel stv-grammar-close">닫기</button></div></div>';
+    }
+
+    document.body.appendChild(overlay);
+
+    var closeModal = function () { overlay.remove(); };
+    overlay.querySelector('.stv-dialog-close').addEventListener('click', closeModal);
+    overlay.querySelector('.stv-grammar-close').addEventListener('click', closeModal);
+    overlay.addEventListener('click', function (e) { if (e.target === overlay) closeModal(); });
+}
+
+/**
+ * Find the best matching grammar explanation for a label.
+ * Tries exact match first, then keyword search.
+ */
+function findGrammarExplanation(label) {
+    if (!label) return null;
+    var normalized = label.trim();
+    // Exact match
+    if (GRAMMAR_EXPLANATIONS[normalized]) return GRAMMAR_EXPLANATIONS[normalized];
+    // Try matching by key appearing in label (e.g. "사역수동 + た형" → "사역수동")
+    var keys = Object.keys(GRAMMAR_EXPLANATIONS);
+    // Sort by key length descending for best match first
+    keys.sort(function (a, b) { return b.length - a.length; });
+    for (var i = 0; i < keys.length; i++) {
+        if (normalized.includes(keys[i])) return GRAMMAR_EXPLANATIONS[keys[i]];
+    }
+    return null;
+}
+
+/**
+ * Show a read-only modal with grammar form explanation.
+ */
+function showGrammarInfoModal(grammarLabel) {
+    var existing = document.getElementById('stv-grammar-modal-overlay');
+    if (existing) existing.remove();
+
+    var info = findGrammarExplanation(grammarLabel);
+
+    var overlay = document.createElement('div');
+    overlay.id = 'stv-grammar-modal-overlay';
+    overlay.className = 'stv-dialog-overlay';
+
+    if (!info) {
+        // No built-in explanation found
+        overlay.innerHTML = '<div class="stv-dialog stv-grammar-modal">'
+            + '<div class="stv-dialog-header"><h3><span class="fa-solid fa-book-open"></span> 문법 정보</h3>'
+            + '<button class="stv-btn stv-btn-icon stv-dialog-close"><span class="fa-solid fa-xmark"></span></button></div>'
+            + '<div class="stv-dialog-body">'
+            + '<div class="stv-grammar-label-display">' + escapeHtml(grammarLabel) + '</div>'
+            + '<p class="stv-grammar-no-info">이 문법형에 대한 내장 설명이 아직 없습니다.</p>'
+            + '</div>'
+            + '<div class="stv-dialog-footer">'
+            + '<button class="stv-btn stv-btn-cancel" id="stv-grammar-modal-close">닫기</button>'
+            + '</div></div>';
+    } else {
+        var bodyHtml = '<div class="stv-grammar-label-display">' + escapeHtml(grammarLabel) + '</div>'
+            + '<h4 class="stv-grammar-name">' + escapeHtml(info.name) + '</h4>';
+        if (info.description) {
+            bodyHtml += '<div class="stv-grammar-section">'
+                + '<div class="stv-grammar-section-title">설명</div>'
+                + '<div class="stv-grammar-section-body">' + escapeHtml(info.description).replace(/\n/g, '<br>') + '</div></div>';
+        }
+        if (info.formation) {
+            bodyHtml += '<div class="stv-grammar-section">'
+                + '<div class="stv-grammar-section-title">형성 규칙</div>'
+                + '<pre class="stv-grammar-formation">' + escapeHtml(info.formation) + '</pre></div>';
+        }
+        if (info.usage) {
+            bodyHtml += '<div class="stv-grammar-section">'
+                + '<div class="stv-grammar-section-title">용례</div>'
+                + '<div class="stv-grammar-section-body">' + escapeHtml(info.usage).replace(/\n/g, '<br>') + '</div></div>';
+        }
+
+        overlay.innerHTML = '<div class="stv-dialog stv-grammar-modal">'
+            + '<div class="stv-dialog-header"><h3><span class="fa-solid fa-book-open"></span> 문법 정보</h3>'
+            + '<button class="stv-btn stv-btn-icon stv-dialog-close"><span class="fa-solid fa-xmark"></span></button></div>'
+            + '<div class="stv-dialog-body">' + bodyHtml + '</div>'
+            + '<div class="stv-dialog-footer">'
+            + '<button class="stv-btn stv-btn-cancel" id="stv-grammar-modal-close">닫기</button>'
+            + '</div></div>';
+    }
+
+    document.body.appendChild(overlay);
+
+    var closeModal = function () { overlay.remove(); };
+    overlay.querySelector('.stv-dialog-close').addEventListener('click', closeModal);
+    overlay.addEventListener('click', function (e) { if (e.target === overlay) closeModal(); });
+    document.getElementById('stv-grammar-modal-close').addEventListener('click', closeModal);
+}
+
 function addVocabWord(data) {
     var settings = getSettings();
     var lang = data.language || detectLanguage(data.word, data.reading);
@@ -1101,7 +1469,10 @@ function addVocabWord(data) {
         meaning: data.meaning || '',
         partOfSpeech: data.partOfSpeech || '',
         grammarInfo: data.grammarInfo || '',
+        verbGroup: data.verbGroup || null,
+        jlptLevel: data.jlptLevel || null,
         baseForm: data.baseForm || null,
+        kanjiBreakdown: data.kanjiBreakdown || null,
         examples: data.examples || [],
         wordForms: data.wordForms || null,
         language: lang,
@@ -1116,7 +1487,7 @@ function addVocabWord(data) {
 
 function updateVocabWord(id, updates) {
     var settings = getSettings();
-    var idx = settings.vocabList.findIndex(function(w) { return w.id === id; });
+    var idx = settings.vocabList.findIndex(function (w) { return w.id === id; });
     if (idx === -1) return null;
     // Normalize reading for Japanese words
     if (updates.reading !== undefined) {
@@ -1131,7 +1502,7 @@ function updateVocabWord(id, updates) {
 
 function removeVocabWord(id) {
     var settings = getSettings();
-    settings.vocabList = settings.vocabList.filter(function(w) { return w.id !== id; });
+    settings.vocabList = settings.vocabList.filter(function (w) { return w.id !== id; });
     saveSettings();
     renderVocabList();
 }
@@ -1192,7 +1563,7 @@ async function analyzeWordWithLLM(word, langOverride) {
         + '- "partOfSpeech": MUST be EXACTLY one of these Korean values: 명사, 동사, 형용사, 부사, 접속사, 조사, 감탄사, 대명사, 전치사, 조동사, 연체사, 접미사, 접두사, 기타\n'
         + '  → For Japanese: 名詞→명사, 動詞→동사, イ形容詞/形容詞→형용사, ナ形容詞/形容動詞→형용사, 副詞→부사, 接続詞→접속사, 助詞→조사, 助動詞→조동사, 連体詞→연체사, 感動詞→감탄사\n'
         + '- "grammarInfo": If the word is a conjugated/inflected form (not dictionary form), provide a SHORT and CONCISE conjugation label. MUST be brief — max ~15 characters. Do NOT include the original word, quotes, or full grammatical breakdowns.\n'
-        + '  → For Japanese: Use SHORT form names ONLY. Examples: "て形", "た形 (과거)", "ます형", "ない형 (부정)", "受身형 (수동)", "使役형", "可能형", "ば형 (가정)", "意向형", "命令형", "未然形 + ず", "連用形". For combined: "使役受身 + た형". NEVER write full sentences like 「動詞「X」の未然形 + 助動詞「ず」」.\n'
+        + '  → For Japanese: Use SHORT form names ONLY. Examples: "て형", "た형 (과거)", "ます형", "ない형 (부정)", "수동형", "사역형", "가능형", "ば형 (가정)", "의향형", "명령형", "금지형 (な)", "なら형", "미연형 + ず", "연용형". For combined: "사역수동 + た형". NEVER write full sentences like 「動詞「X」の未然形 + 助動詞「ず」」.\n'
         + '  → For Korean: e.g. "과거형", "진행형", "피동형", "사동형", "연결 -아서", "관형사형", "명사형 -기"\n'
         + '  → For English: e.g. "past tense", "past participle", "-ing form", "comparative", "superlative", "plural", "3rd person"\n'
         + '  → Empty string "" if the word is already in its dictionary/base form.\n'
@@ -1200,27 +1571,44 @@ async function analyzeWordWithLLM(word, langOverride) {
         + '- "examples": array of 2 objects, each with "sentence" (example sentence in original language)' + (lang === 'ko' ? '. Since this is a Korean word, do NOT include "translation" field — Korean examples need no translation.\n' : ' and "translation" (Korean translation of that sentence)\n')
         + '- "wordForms": an object listing ALL inflected/derived forms of this word, grouped by part of speech. Each key is a part-of-speech label in Korean (e.g. "동사형", "명사형", "형용사형"), and the value is an array of objects with "label" (form description in Korean) and "word" (the actual form). IMPORTANT: "word" must contain ONLY the word itself, without any reading/pronunciation in parentheses. Correct: "食べて". Wrong: "食べて (たべて)".\n'
         + '  → Example for English "do": {"동사형":[{"label":"3인칭 단수 현재","word":"does"},{"label":"과거형","word":"did"},{"label":"과거 분사","word":"done"},{"label":"현재 분사","word":"doing"}],"명사형":[{"label":"복수형","word":"dos"}]}\n'
-        + '  → Example for Japanese "食べる": {"동사형":[{"label":"て형","word":"食べて"},{"label":"た형","word":"食べた"},{"label":"ない형","word":"食べない"},{"label":"ます형","word":"食べます"},{"label":"受身형","word":"食べられる"},{"label":"使役형","word":"食べさせる"},{"label":"可能형","word":"食べられる"},{"label":"意向형","word":"食べよう"},{"label":"仮定형","word":"食べれば"},{"label":"命令형","word":"食べろ"}]}\n'
-        + '  → For Japanese verbs, ALSO include the 連用形 (continuative/stem form) used as a noun if it is commonly used. Add it under "명사형" group with label "連用形/명사". Examples: 空く→空き, 休む→休み, 動く→動き, 始まる→始まり, 終わる→終わり, 遊ぶ→遊び, 流れる→流れ, 話す→話, 光る→光\n'
+        + '  → Example for Japanese "食べる": {"동사형":[{"label":"て형","word":"食べて"},{"label":"た형","word":"食べた"},{"label":"ない형","word":"食べない"},{"label":"ます형","word":"食べます"},{"label":"수동형","word":"食べられる"},{"label":"사역형","word":"食べさせる"},{"label":"가능형","word":"食べられる"},{"label":"의향형","word":"食べよう"},{"label":"가정형","word":"食べれば"},{"label":"명령형","word":"食べろ"},{"label":"금지형","word":"食べるな"}]}\n'
+        + '  → For Japanese verbs, ALSO include the 연용형 (continuative/stem form) used as a noun if it is commonly used. Add it under "명사형" group with label "연용형/명사". Examples: 空く→空き, 休む→休み, 動く→動き, 始まる→始まり, 終わる→終わり, 遊ぶ→遊び, 流れる→流れ, 話す→話, 光る→光\n'
         + '  → Example for Korean "먹다": {"동사형":[{"label":"과거형","word":"먹었다"},{"label":"현재 진행","word":"먹고 있다"},{"label":"연결형 -아/어","word":"먹어"},{"label":"관형사형","word":"먹는/먹은/먹을"}]}\n'
         + '  → Include forms for ALL parts of speech the word can serve as. If the word is ONLY used as one part of speech, include just that one group.\n'
-        + '  → If the word is already a conjugated form, show forms based on its dictionary/base form.\n\n'
+        + '  → If the word is already a conjugated form, show forms based on its dictionary/base form.\n'
+        + '- "verbGroup": (Japanese verbs only) verb conjugation group. MUST be EXACTLY one of: "五段", "一段", "サ変", "カ変". Return null if the word is not a Japanese verb.\n'
+        + '- "jlptLevel": (Japanese words only) estimated JLPT level. MUST be EXACTLY one of: "N5", "N4", "N3", "N2", "N1". Return null if not Japanese or if the word is outside JLPT scope.\n'
+        + '- "kanjiBreakdown": (Japanese words containing kanji only) array of kanji characters in the word with their individual info. Format: [{"kanji":"代","meaning":"대신할 대","onyomi":"ダイ, タイ","kunyomi":"か(わる), か(える)"}]. Return null if the word has no kanji.\n\n'
         + 'Example format for "examples": [{"sentence":"彼は毎日走る。","translation":"그는 매일 달린다."},{"sentence":"公園で走るのが好きだ。","translation":"공원에서 달리는 것을 좋아한다."}]\n\n'
         + 'Return ONLY the JSON object, no other text.\n\n'
         + 'Word: ' + word + '\n\nJSON:';
 
     try {
         var resp = await callLLM(prompt);
+        if (!resp || typeof resp !== 'string') {
+            console.warn('[' + MODULE_NAME + '] analyzeWord: empty or invalid LLM response for "' + word + '"');
+            return null;
+        }
         var match = resp.match(/\{[\s\S]*\}/);
-        if (!match) return null;
-        var result = JSON.parse(match[0]);
+        if (!match) {
+            console.warn('[' + MODULE_NAME + '] analyzeWord: no JSON found in response for "' + word + '"');
+            return null;
+        }
+        // Sanitize control characters that break JSON.parse
+        // 1. Remove truly invalid control chars
+        var jsonStr = match[0].replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, '');
+        // 2. Escape literal newlines/tabs inside JSON string values
+        jsonStr = jsonStr.replace(/"(?:[^"\\]|\\.)*"/g, function (m) {
+            return m.replace(/\n/g, '\\n').replace(/\r/g, '\\r').replace(/\t/g, '\\t');
+        });
+        var result = JSON.parse(jsonStr);
         // Normalize part of speech
         if (result.partOfSpeech) {
             result.partOfSpeech = normalizePartOfSpeech(result.partOfSpeech);
         }
         // Normalize examples to [{sentence, translation}] format
         if (result.examples && Array.isArray(result.examples)) {
-            result.examples = result.examples.map(function(ex) {
+            result.examples = result.examples.map(function (ex) {
                 if (typeof ex === 'string') return { sentence: ex, translation: '' };
                 if (ex && typeof ex === 'object') return { sentence: ex.sentence || '', translation: ex.translation || '' };
                 return { sentence: String(ex), translation: '' };
@@ -1228,10 +1616,10 @@ async function analyzeWordWithLLM(word, langOverride) {
         }
         // Clean wordForms: strip parenthetical readings from word fields
         if (result.wordForms && typeof result.wordForms === 'object') {
-            Object.keys(result.wordForms).forEach(function(groupKey) {
+            Object.keys(result.wordForms).forEach(function (groupKey) {
                 var forms = result.wordForms[groupKey];
                 if (Array.isArray(forms)) {
-                    forms.forEach(function(form) {
+                    forms.forEach(function (form) {
                         if (form.word && typeof form.word === 'string') {
                             // Remove readings like "(あく)" or "（あく）" or " (あく)"
                             form.word = form.word.replace(/\s*[\(\uff08][^\)\uff09]*[\)\uff09]\s*$/, '').trim();
@@ -1242,7 +1630,7 @@ async function analyzeWordWithLLM(word, langOverride) {
         }
         return result;
     } catch (e) {
-        console.error('[' + MODULE_NAME + '] analyzeWord error:', e);
+        console.error('[' + MODULE_NAME + '] analyzeWord error for "' + word + '":', e && e.message ? e.message : e, e);
         return null;
     }
 }
@@ -1258,7 +1646,7 @@ async function generateExamplesWithLLM(word, existingExamples, langOverride) {
     var existingText = '';
     if (existingExamples && existingExamples.length > 0) {
         existingText = '\n\nAlready existing examples (do NOT repeat these):\n';
-        existingExamples.forEach(function(ex) {
+        existingExamples.forEach(function (ex) {
             var s = (typeof ex === 'string') ? ex : (ex.sentence || '');
             if (s) existingText += '- ' + s + '\n';
         });
@@ -1281,9 +1669,9 @@ async function generateExamplesWithLLM(word, existingExamples, langOverride) {
         var match = resp.match(/\[[\s\S]*?\]/);
         if (!match) return [];
         var results = JSON.parse(match[0]);
-        return results.filter(function(r) {
+        return results.filter(function (r) {
             return r && r.sentence;
-        }).map(function(r) {
+        }).map(function (r) {
             return { sentence: r.sentence || '', translation: r.translation || '' };
         });
     } catch (e) {
@@ -1304,8 +1692,8 @@ async function detectBaseForm(word, langOverride) {
         + 'Rules:\n'
         + '- For Japanese:\n'
         + '  • Verbs: ANY conjugated form → dictionary form (e.g. 食べた→食べる, 走って→走る, にして→にする, 話せば→話す, 書かない→書く, 見られる→見る, させる→する)\n'
-        + '  • て形/た形/ます形/ない形/ば形/受身形/使役形/可能形/意向形/命令形 → ALL are NOT base form\n'
-        + '  • 連用形 (continuative form) used as noun: these are derived nouns from verbs. Return the verb dictionary form.\n'
+        + '  • て형/た형/ます형/ない형/ば형/수동형/사역형/가능형/의향형/명령형 → ALL are NOT base form\n'
+        + '  • 연용형 (continuative form) used as noun: these are derived nouns from verbs. Return the verb dictionary form.\n'
         + '    Examples: 空き(あき)→空く(あく), 休み(やすみ)→休む(やすむ), 始まり(はじまり)→始まる(はじまる), 終わり(おわり)→終わる(おわる), 動き(うごき)→動く(うごく), 遊び(あそび)→遊ぶ(あそぶ)\n'
         + '    HOWEVER: If the noun form is the PRIMARY/most common usage and rarely used as a verb in modern Japanese (e.g. 話=story is primarily a noun), return null.\n'
         + '  • Compound verbs with particles: にして→にする, として→とする, について→につく or について(as grammar point→null)\n'
@@ -1352,11 +1740,11 @@ function showBaseFormSnackbar(originalWord, baseForm) {
     // Remove any existing snackbar
     var old = document.getElementById('stv-snackbar');
     if (old) {
-        try { old.hidePopover(); } catch(e) {}
+        try { old.hidePopover(); } catch (e) { }
         old.remove();
     }
 
-    var existing = getVocab().find(function(w) { return w.word === baseForm; });
+    var existing = getVocab().find(function (w) { return w.word === baseForm; });
     if (existing) return; // base form already in vocab
 
     var snackbar = document.createElement('div');
@@ -1374,29 +1762,29 @@ function showBaseFormSnackbar(originalWord, baseForm) {
     document.body.appendChild(snackbar);
     snackbar.showPopover();
     // Double rAF ensures the initial hidden state is painted before showing
-    requestAnimationFrame(function() {
-        requestAnimationFrame(function() {
+    requestAnimationFrame(function () {
+        requestAnimationFrame(function () {
             snackbar.classList.add('stv-snackbar-show');
         });
     });
 
-    var autoHide = setTimeout(function() { dismissSnackbar(); }, 15000);
+    var autoHide = setTimeout(function () { dismissSnackbar(); }, 15000);
 
     function dismissSnackbar() {
         clearTimeout(autoHide);
         snackbar.classList.remove('stv-snackbar-show');
         snackbar.classList.add('stv-snackbar-hide');
-        setTimeout(function() {
-            try { snackbar.hidePopover(); } catch(e) {}
+        setTimeout(function () {
+            try { snackbar.hidePopover(); } catch (e) { }
             snackbar.remove();
         }, 300);
     }
 
-    snackbar.querySelector('.stv-snackbar-no').addEventListener('click', function() {
+    snackbar.querySelector('.stv-snackbar-no').addEventListener('click', function () {
         dismissSnackbar();
     });
 
-    snackbar.querySelector('.stv-snackbar-yes').addEventListener('click', async function() {
+    snackbar.querySelector('.stv-snackbar-yes').addEventListener('click', async function () {
         dismissSnackbar();
         // Open the word dialog prefilled with the base form (no auto-analyze)
         await showWordDialog(null, {});
@@ -1419,20 +1807,20 @@ function showExportDialog(vocab) {
 
     // Count words per language for display
     var langCounts = {};
-    vocab.forEach(function(w) {
+    vocab.forEach(function (w) {
         var l = w.language || 'unknown';
         langCounts[l] = (langCounts[l] || 0) + 1;
     });
     var langLabelsMap = { ja: '日本語', en: 'English', ko: '한국어', zh: '中文', other: '기타', unknown: '기타' };
     var langFilterHtml = '<option value="" selected>전체 (' + vocab.length + ')</option>';
-    Object.keys(langCounts).forEach(function(l) {
+    Object.keys(langCounts).forEach(function (l) {
         langFilterHtml += '<option value="' + l + '">' + (langLabelsMap[l] || l) + ' (' + langCounts[l] + ')</option>';
     });
 
     // Compute date range from vocab
-    var dates = vocab.map(function(w) { return w.addedAt ? w.addedAt.slice(0, 10) : ''; }).filter(Boolean);
-    var minDate = dates.length > 0 ? dates.reduce(function(a, b) { return a < b ? a : b; }) : '';
-    var maxDate = dates.length > 0 ? dates.reduce(function(a, b) { return a > b ? a : b; }) : '';
+    var dates = vocab.map(function (w) { return w.addedAt ? w.addedAt.slice(0, 10) : ''; }).filter(Boolean);
+    var minDate = dates.length > 0 ? dates.reduce(function (a, b) { return a < b ? a : b; }) : '';
+    var maxDate = dates.length > 0 ? dates.reduce(function (a, b) { return a > b ? a : b; }) : '';
     var today = new Date().toISOString().slice(0, 10);
 
     var overlay = document.createElement('div');
@@ -1463,25 +1851,25 @@ function showExportDialog(vocab) {
         + '</div></div></div>';
     document.body.appendChild(overlay);
 
-    var closeExport = function() { overlay.remove(); };
+    var closeExport = function () { overlay.remove(); };
     overlay.querySelector('.stv-dialog-close').addEventListener('click', closeExport);
-    overlay.addEventListener('click', function(e) { if (e.target === overlay) closeExport(); });
+    overlay.addEventListener('click', function (e) { if (e.target === overlay) closeExport(); });
 
     // Helpers
     function getFilteredVocab() {
         var langVal = document.getElementById('stv-export-lang-filter').value;
         var dateMode = document.getElementById('stv-export-date-mode').value;
-        var filtered = langVal ? vocab.filter(function(w) { return w.language === langVal; }) : vocab.slice();
+        var filtered = langVal ? vocab.filter(function (w) { return w.language === langVal; }) : vocab.slice();
         if (dateMode === 'single') {
             var dateVal = document.getElementById('stv-export-date-from').value;
             if (dateVal) {
-                filtered = filtered.filter(function(w) { return w.addedAt && w.addedAt.slice(0, 10) === dateVal; });
+                filtered = filtered.filter(function (w) { return w.addedAt && w.addedAt.slice(0, 10) === dateVal; });
             }
         } else if (dateMode === 'range') {
             var from = document.getElementById('stv-export-date-from').value;
             var to = document.getElementById('stv-export-date-to').value;
-            if (from) filtered = filtered.filter(function(w) { return w.addedAt && w.addedAt.slice(0, 10) >= from; });
-            if (to) filtered = filtered.filter(function(w) { return w.addedAt && w.addedAt.slice(0, 10) <= to; });
+            if (from) filtered = filtered.filter(function (w) { return w.addedAt && w.addedAt.slice(0, 10) >= from; });
+            if (to) filtered = filtered.filter(function (w) { return w.addedAt && w.addedAt.slice(0, 10) <= to; });
         }
         return filtered;
     }
@@ -1491,7 +1879,7 @@ function showExportDialog(vocab) {
     }
 
     // Date mode toggle
-    document.getElementById('stv-export-date-mode').addEventListener('change', function() {
+    document.getElementById('stv-export-date-mode').addEventListener('change', function () {
         var mode = this.value;
         var inputs = document.getElementById('stv-export-date-inputs');
         var sep = document.getElementById('stv-export-date-sep');
@@ -1504,32 +1892,32 @@ function showExportDialog(vocab) {
             sep.style.display = 'none';
             toInput.style.display = 'none';
             // Auto-open date picker
-            setTimeout(function() { try { fromInput.showPicker(); } catch (_) { fromInput.focus(); } }, 100);
+            setTimeout(function () { try { fromInput.showPicker(); } catch (_) { fromInput.focus(); } }, 100);
         } else {
             inputs.style.display = 'flex';
             sep.style.display = '';
             toInput.style.display = '';
             // Auto-open date picker for start date
-            setTimeout(function() { try { fromInput.showPicker(); } catch (_) { fromInput.focus(); } }, 100);
+            setTimeout(function () { try { fromInput.showPicker(); } catch (_) { fromInput.focus(); } }, 100);
         }
         updateCount();
     });
 
     // Update count on filter changes
     document.getElementById('stv-export-lang-filter').addEventListener('change', updateCount);
-    document.getElementById('stv-export-date-from').addEventListener('change', function() {
+    document.getElementById('stv-export-date-from').addEventListener('change', function () {
         updateCount();
         // In range mode, auto-open the end date picker after selecting start date
         var mode = document.getElementById('stv-export-date-mode').value;
         if (mode === 'range') {
             var toInput = document.getElementById('stv-export-date-to');
-            setTimeout(function() { try { toInput.showPicker(); } catch (_) { toInput.focus(); } }, 100);
+            setTimeout(function () { try { toInput.showPicker(); } catch (_) { toInput.focus(); } }, 100);
         }
     });
     document.getElementById('stv-export-date-to').addEventListener('change', updateCount);
 
-    overlay.querySelectorAll('.stv-export-btn').forEach(function(btn) {
-        btn.addEventListener('click', function() {
+    overlay.querySelectorAll('.stv-export-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
             var format = btn.dataset.format;
             var filtered = getFilteredVocab();
             if (filtered.length === 0) { toastr.warning('내보낼 단어가 없습니다.'); return; }
@@ -1554,14 +1942,14 @@ function exportVocabTXT(vocab) {
     lines.push('총 단어 수: ' + vocab.length);
     lines.push('━'.repeat(40));
     lines.push('');
-    vocab.forEach(function(w, idx) {
+    vocab.forEach(function (w, idx) {
         lines.push((idx + 1) + '. ' + w.word + (w.reading ? '  [' + w.reading + ']' : ''));
         if (w.partOfSpeech) lines.push('   품사: ' + w.partOfSpeech);
         if (w.grammarInfo) lines.push('   문법: ' + w.grammarInfo);
         if (w.meaning) lines.push('   뜻: ' + w.meaning);
         if (w.examples && w.examples.length > 0) {
             lines.push('   예문:');
-            w.examples.forEach(function(ex) {
+            w.examples.forEach(function (ex) {
                 var sentence = getExampleSentence(ex);
                 var translation = getExampleTranslation(ex);
                 lines.push('     • ' + sentence);
@@ -1577,68 +1965,121 @@ function exportVocabTXT(vocab) {
 }
 
 function exportVocabPDF(vocab) {
-    // Generate a clean printable HTML and use browser print to PDF
     var langLabels = { ja: '日本語', en: 'English', ko: '한국어', zh: '中文', other: '기타' };
-    var html = '<!DOCTYPE html><html><head><meta charset="utf-8">'
-        + '<title>ST-Vocabulary 단어장</title>'
+    var html = '<!DOCTYPE html><html lang="ko"><head><meta charset="utf-8">'
+        + '<title>ST-Vocabulary</title>'
+        + '<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-jp-dynamic-subset.min.css">'
+        + '<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">'
         + '<style>'
-        + 'body{font-family:"Noto Sans KR","Malgun Gothic","맑은 고딕",sans-serif;margin:30px 40px;color:#222;font-size:12px;}'
-        + 'h1{text-align:center;font-size:20px;margin-bottom:4px;}'
+        + "body{font-family:'Pretendard JP Variable','Pretendard Variable','Pretendard JP','Pretendard',-apple-system,BlinkMacSystemFont,system-ui,'Noto Sans KR','Malgun Gothic',sans-serif;margin:30px 40px;color:#222;font-size:12px;line-height:1.5;}"
         + '.subtitle{text-align:center;color:#888;font-size:11px;margin-bottom:20px;}'
         + 'table{width:100%;border-collapse:collapse;page-break-inside:auto;}'
         + 'thead{display:table-header-group;}'
         + 'tr{page-break-inside:avoid;page-break-after:auto;}'
-        + 'th{background:#4a90d9;color:#fff;padding:8px 10px;text-align:left;font-size:11px;font-weight:600;}'
-        + 'td{padding:8px 10px;border-bottom:1px solid #e0e0e0;vertical-align:top;font-size:12px;}'
-        + 'tr:nth-child(even) td{background:#f8f9fa;}'
-        + '.word{font-size:16px;font-weight:bold;}'
-        + '.reading{color:#666;font-size:12px;}'
-        + '.pos{display:inline-block;background:#e8f0fe;color:#4a90d9;padding:1px 6px;border-radius:8px;font-size:10px;}'
-        + '.lang{display:inline-block;background:#f0f0f0;color:#666;padding:1px 5px;border-radius:8px;font-size:9px;margin-left:4px;}'
-        + '.meaning{margin-top:2px;white-space:pre-line;}'
-        + '.examples{margin-top:4px;color:#555;font-size:11px;}'
-        + '.example-item{padding:2px 0 2px 8px;border-left:2px solid #ddd;margin-bottom:2px;}'
-        + '.example-trans{color:#888;font-size:10px;font-style:italic;}'
-        + '.footer{text-align:center;color:#aaa;font-size:10px;margin-top:20px;}'
-        + '@media print{body{margin:15px 20px;} @page{margin:15mm;}}'
+        + 'th{background:#333;color:#fff;padding:6px 8px;text-align:left;font-size:10px;font-weight:600;letter-spacing:0.3px;}'
+        + 'td{padding:7px 8px;border-bottom:1px solid #ccc;vertical-align:top;font-size:12px;}'
+        + '.word{font-size:19px;font-weight:bold;}'
+        + '.reading{color:#555;font-size:11px;}'
+        + '.tags{margin-top:2px;font-size:9.5px;color:#666;}'
+        + '.tags span{margin-right:3px;}'
+        + '.tag-sep{color:#ccc;}'
+        + '.baseform{font-size:10.5px;color:#666;margin-top:2px;}'
+        + '.meaning{white-space:pre-line;}'
+        + '.kanji-row{font-size:10.5px;color:#555;margin-top:4px;padding-top:3px;border-top:1px dashed #ddd;}'
+        + '.kanji-entry{margin-bottom:1px;}'
+        + '.kanji-char{font-weight:500;font-size:13px;}'
+        + '.example-item{margin-bottom:3px;padding-left:6px;border-left:2px solid #ccc;}'
+        + '.example-trans{color:#777;font-size:10.5px;font-style:italic;}'
+        + '.wf-group-name{font-size:9.5px;color:#888;font-weight:600;margin-top:3px;}'
+        + '.wf-group-name:first-child{margin-top:0;}'
+        + '.wf-item{font-size:11px;display:inline;white-space:nowrap;}'
+        + '.wf-label{color:#888;font-size:9.5px;}'
+        + '.wf-sep{color:#ccc;margin:0 2px;}'
+        + '@media print{body{margin:15px 20px;}@page{margin:12mm;}th{background:#333!important;color:#fff!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;}}'
         + '</style></head><body>'
-        + '<h1>\uD83D\uDCD6 ST-Vocabulary 단어장</h1>'
-        + '<div class="subtitle">' + new Date().toLocaleDateString('ko-KR') + ' | 총 ' + vocab.length + '개 단어</div>'
-        + '<table><thead><tr><th style="width:3%">#</th><th style="width:22%">단어</th><th style="width:30%">뜻</th><th style="width:45%">예문</th></tr></thead><tbody>';
+        + '<div class="subtitle">' + new Date().toLocaleDateString('ko-KR') + ' | ' + vocab.length + '개 단어</div>'
+        + '<table><thead><tr>'
+        + '<th style="width:3%">#</th>'
+        + '<th style="width:18%">단어</th>'
+        + '<th style="width:22%">뜻</th>'
+        + '<th style="width:30%">예문</th>'
+        + '<th style="width:27%">활용형</th>'
+        + '</tr></thead><tbody>';
 
-    vocab.forEach(function(w, idx) {
+    vocab.forEach(function (w, idx) {
+        // Tags (partOfSpeech, lang, grammar, jlpt, verbGroup)
+        var tags = [];
+        if (w.partOfSpeech) tags.push(escapeHtml(w.partOfSpeech));
+        tags.push(langLabels[w.language] || w.language || '');
+        if (w.grammarInfo) tags.push(escapeHtml(w.grammarInfo));
+        if (w.jlptLevel) tags.push(escapeHtml(w.jlptLevel));
+        if (w.verbGroup) tags.push(escapeHtml(w.verbGroup));
+        var tagsHtml = '<div class="tags">' + tags.map(function (t, i) {
+            return '<span>' + t + '</span>' + (i < tags.length - 1 ? '<span class="tag-sep">|</span>' : '');
+        }).join('') + '</div>';
+
+        // Base form
+        var baseHtml = w.baseForm ? '<div class="baseform">원형: ' + escapeHtml(w.baseForm) + '</div>' : '';
+
+        // Kanji breakdown
+        var kanjiHtml = '';
+        if (w.kanjiBreakdown && Array.isArray(w.kanjiBreakdown) && w.kanjiBreakdown.length > 0) {
+            kanjiHtml = '<div class="kanji-row">';
+            w.kanjiBreakdown.forEach(function (k) {
+                var info = escapeHtml(k.meaning || '');
+                if (k.onyomi) info += ' (' + escapeHtml(k.onyomi);
+                if (k.kunyomi) info += (k.onyomi ? ' / ' : ' (') + escapeHtml(k.kunyomi);
+                if (k.onyomi || k.kunyomi) info += ')';
+                kanjiHtml += '<div class="kanji-entry"><span class="kanji-char">' + escapeHtml(k.kanji || '') + '</span> ' + info + '</div>';
+            });
+            kanjiHtml += '</div>';
+        }
+
+        // Examples
         var exHtml = '';
         if (w.examples && w.examples.length > 0) {
-            w.examples.forEach(function(ex) {
+            w.examples.forEach(function (ex) {
                 var s = getExampleSentence(ex);
                 var t = getExampleTranslation(ex);
                 exHtml += '<div class="example-item">' + escapeHtml(s);
-                if (t) exHtml += '<div class="example-trans">→ ' + escapeHtml(t) + '</div>';
+                if (t) exHtml += '<div class="example-trans">\u2192 ' + escapeHtml(t) + '</div>';
                 exHtml += '</div>';
             });
         }
+
+        // Word forms
+        var wfHtml = '';
+        if (w.wordForms && typeof w.wordForms === 'object') {
+            var groups = Object.keys(w.wordForms);
+            groups.forEach(function (groupLabel) {
+                var forms = w.wordForms[groupLabel];
+                if (!Array.isArray(forms) || forms.length === 0) return;
+                wfHtml += '<div class="wf-group-name">' + escapeHtml(groupLabel) + '</div>';
+                forms.forEach(function (form, fi) {
+                    wfHtml += '<span class="wf-item"><span class="wf-label">' + escapeHtml(form.label || '') + '</span> ' + escapeHtml(form.word || '') + '</span>';
+                    if (fi < forms.length - 1) wfHtml += '<span class="wf-sep">|</span>';
+                });
+            });
+        }
+
         html += '<tr>'
             + '<td>' + (idx + 1) + '</td>'
             + '<td><span class="word">' + escapeHtml(w.word) + '</span>'
             + (w.reading ? '<br><span class="reading">[' + escapeHtml(w.reading) + ']</span>' : '')
-            + (w.partOfSpeech ? '<br><span class="pos">' + escapeHtml(w.partOfSpeech) + '</span>' : '')
-            + (w.language ? '<span class="lang">' + (langLabels[w.language] || w.language) + '</span>' : '')
-            + '</td>'
+            + tagsHtml + baseHtml + kanjiHtml + '</td>'
             + '<td class="meaning">' + escapeHtml(w.meaning || '').replace(/\n/g, '<br>') + '</td>'
-            + '<td class="examples">' + exHtml + '</td>'
+            + '<td>' + exHtml + '</td>'
+            + '<td>' + wfHtml + '</td>'
             + '</tr>';
     });
 
-    html += '</tbody></table>'
-        + '<div class="footer">Generated by ST-Vocabulary Extension</div>'
-        + '</body></html>';
+    html += '</tbody></table></body></html>';
 
     var win = window.open('', '_blank');
     if (!win) { toastr.error('팝업이 차단되었습니다. 팝업을 허용해 주세요.'); return; }
     win.document.write(html);
     win.document.close();
-    // Auto-trigger print dialog for PDF saving
-    setTimeout(function() {
+    setTimeout(function () {
         win.print();
     }, 500);
     toastr.success('PDF 인쇄 대화상자가 열립니다. "PDF로 저장"을 선택하세요.');
@@ -1663,7 +2104,7 @@ function importVocab() {
     var input = document.createElement('input');
     input.type = 'file';
     input.accept = '.json';
-    input.onchange = async function(e) {
+    input.onchange = async function (e) {
         var file = e.target.files[0];
         if (!file) return;
         try {
@@ -1671,7 +2112,7 @@ function importVocab() {
             var imported = JSON.parse(text);
             if (!Array.isArray(imported)) throw new Error('올바른 형식이 아닙니다.');
             var settings = getSettings();
-            var existing = new Set(settings.vocabList.map(function(w) { return w.word + '|' + w.language; }));
+            var existing = new Set(settings.vocabList.map(function (w) { return w.word + '|' + w.language; }));
             var added = 0;
             for (var i = 0; i < imported.length; i++) {
                 var w = imported[i];
@@ -1716,8 +2157,8 @@ function createVocabPanel() {
         + '<div class="stv-panel-actions">'
         + '<button class="stv-btn stv-btn-icon" id="stv-btn-multiselect" title="다중 선택"><span class="fa-solid fa-check-double"></span></button>'
         + '<button class="stv-btn stv-btn-icon" id="stv-btn-add" title="단어 추가"><span class="fa-solid fa-plus"></span></button>'
-        + '<button class="stv-btn stv-btn-icon" id="stv-btn-export" title="내보내기"><span class="fa-solid fa-download"></span></button>'
-        + '<button class="stv-btn stv-btn-icon" id="stv-btn-import" title="가져오기"><span class="fa-solid fa-upload"></span></button>'
+        + '<button class="stv-btn stv-btn-icon" id="stv-btn-export" title="내보내기"><span class="fa-solid fa-file-export"></span></button>'
+        + '<button class="stv-btn stv-btn-icon" id="stv-btn-import" title="가져오기"><span class="fa-solid fa-file-import"></span></button>'
         + '<button class="stv-btn stv-btn-icon" id="stv-btn-close" title="닫기"><span class="fa-solid fa-xmark"></span></button>'
         + '</div></div>'
         + '<div id="stv-multi-actions" class="stv-multi-select-actions" style="display:none;">'
@@ -1754,6 +2195,14 @@ function createVocabPanel() {
         + '<option value="접미사">접미사</option>'
         + '<option value="접두사">접두사</option>'
         + '<option value="기타">기타</option>'
+        + '</select>'
+        + '<select id="stv-filter-jlpt">'
+        + '<option value="">JLPT</option>'
+        + '<option value="N5">N5</option>'
+        + '<option value="N4">N4</option>'
+        + '<option value="N3">N3</option>'
+        + '<option value="N2">N2</option>'
+        + '<option value="N1">N1</option>'
         + '</select></div>'
         + '<div class="stv-stats"><span id="stv-word-count">0</span>개 단어</div>'
         + '<div id="stv-word-list" class="stv-word-list"></div>';
@@ -1764,17 +2213,27 @@ function createVocabPanel() {
     backdrop.className = 'stv-backdrop';
     document.body.appendChild(backdrop);
 
-    document.getElementById('stv-btn-close').addEventListener('click', function() {
+    document.getElementById('stv-btn-close').addEventListener('click', function () {
         exitMultiSelectMode();
         toggleVocabPanel();
     });
-    document.getElementById('stv-btn-add').addEventListener('click', function() { showWordDialog(); });
+    document.getElementById('stv-btn-add').addEventListener('click', function () { showWordDialog(); });
     document.getElementById('stv-btn-export').addEventListener('click', exportVocab);
     document.getElementById('stv-btn-import').addEventListener('click', importVocab);
-    document.getElementById('stv-search').addEventListener('input', function() { renderVocabList(); });
-    document.getElementById('stv-filter-lang').addEventListener('change', function() { renderVocabList(); });
-    document.getElementById('stv-filter-pos').addEventListener('change', function() { renderVocabList(); });
-    document.getElementById('stv-btn-multiselect').addEventListener('click', function() {
+    document.getElementById('stv-search').addEventListener('input', function () { renderVocabList(); });
+    document.getElementById('stv-filter-lang').addEventListener('change', function () {
+        var jlptSel = document.getElementById('stv-filter-jlpt');
+        if (jlptSel) {
+            var lang = this.value;
+            var shouldDisable = lang !== '' && lang !== 'ja';
+            jlptSel.disabled = shouldDisable;
+            if (shouldDisable) jlptSel.value = '';
+        }
+        renderVocabList();
+    });
+    document.getElementById('stv-filter-pos').addEventListener('change', function () { renderVocabList(); });
+    document.getElementById('stv-filter-jlpt').addEventListener('change', function () { renderVocabList(); });
+    document.getElementById('stv-btn-multiselect').addEventListener('click', function () {
         multiSelectMode = !multiSelectMode;
         this.classList.toggle('stv-active', multiSelectMode);
         var actions = document.getElementById('stv-multi-actions');
@@ -1782,31 +2241,31 @@ function createVocabPanel() {
         if (!multiSelectMode) selectedWordIds.clear();
         renderVocabList();
     });
-    document.getElementById('stv-select-all').addEventListener('click', function() {
+    document.getElementById('stv-select-all').addEventListener('click', function () {
         var cards = document.querySelectorAll('#stv-word-list .stv-word-card');
-        cards.forEach(function(c) {
+        cards.forEach(function (c) {
             selectedWordIds.add(c.dataset.id);
             c.classList.add('stv-selected');
         });
         updateSelectCount();
     });
-    document.getElementById('stv-deselect-all').addEventListener('click', function() {
+    document.getElementById('stv-deselect-all').addEventListener('click', function () {
         selectedWordIds.clear();
-        document.querySelectorAll('#stv-word-list .stv-word-card').forEach(function(c) { c.classList.remove('stv-selected'); });
+        document.querySelectorAll('#stv-word-list .stv-word-card').forEach(function (c) { c.classList.remove('stv-selected'); });
         updateSelectCount();
     });
-    document.getElementById('stv-delete-selected').addEventListener('click', function() {
+    document.getElementById('stv-delete-selected').addEventListener('click', function () {
         if (selectedWordIds.size === 0) return;
         if (!confirm(selectedWordIds.size + '개 단어를 삭제하시겠습니까?')) return;
-        selectedWordIds.forEach(function(id) { removeVocabWord(id); });
+        selectedWordIds.forEach(function (id) { removeVocabWord(id); });
         toastr.info(selectedWordIds.size + '개 단어 삭제됨');
         selectedWordIds.clear();
         updateSelectCount();
         renderVocabList();
-        setTimeout(function() { refreshVocabHighlightsInChat(); }, 100);
+        setTimeout(function () { refreshVocabHighlightsInChat(); }, 100);
     });
     // backdrop click to close panel on mobile
-    backdrop.addEventListener('click', function() {
+    backdrop.addEventListener('click', function () {
         exitMultiSelectMode();
         toggleVocabPanel();
     });
@@ -1847,18 +2306,21 @@ function renderVocabList() {
     var langFilter = langEl ? langEl.value : '';
     var posEl = document.getElementById('stv-filter-pos');
     var posFilter = posEl ? posEl.value : '';
+    var jlptEl = document.getElementById('stv-filter-jlpt');
+    var jlptFilter = jlptEl ? jlptEl.value : '';
 
     if (searchQuery) {
-        words = words.filter(function(w) {
+        words = words.filter(function (w) {
             return w.word.toLowerCase().includes(searchQuery)
                 || w.meaning.toLowerCase().includes(searchQuery)
                 || w.reading.toLowerCase().includes(searchQuery);
         });
     }
-    if (langFilter) words = words.filter(function(w) { return w.language === langFilter; });
-    if (posFilter) words = words.filter(function(w) { return w.partOfSpeech === posFilter; });
+    if (langFilter) words = words.filter(function (w) { return w.language === langFilter; });
+    if (posFilter) words = words.filter(function (w) { return w.partOfSpeech === posFilter; });
+    if (jlptFilter) words = words.filter(function (w) { return w.jlptLevel === jlptFilter; });
 
-    words.sort(function(a, b) { return new Date(b.addedAt) - new Date(a.addedAt); });
+    words.sort(function (a, b) { return new Date(b.addedAt) - new Date(a.addedAt); });
 
     if (countEl) countEl.textContent = words.length;
 
@@ -1871,7 +2333,7 @@ function renderVocabList() {
         return;
     }
 
-    listEl.innerHTML = words.map(function(w) {
+    listEl.innerHTML = words.map(function (w) {
         var isSelected = selectedWordIds.has(w.id);
         return '<div class="stv-word-card' + (multiSelectMode ? ' stv-selectable' : '') + (isSelected ? ' stv-selected' : '') + '" data-id="' + w.id + '">'
             + '<div class="stv-word-card-header">'
@@ -1884,10 +2346,12 @@ function renderVocabList() {
             + '</div></div>'
             + (w.partOfSpeech ? '<span class="stv-pos-badge">' + escapeHtml(w.partOfSpeech) + '</span>' : '')
             + '<span class="stv-lang-badge stv-lang-' + w.language + '">' + getLangLabel(w.language) + '</span>'
-            + (w.grammarInfo ? '<span class="stv-grammar-badge">' + escapeHtml(w.grammarInfo) + '</span>' : '')
+            + (w.grammarInfo ? '<button class="stv-grammar-badge" data-grammar="' + escapeHtml(w.grammarInfo) + '">' + escapeHtml(w.grammarInfo) + '</button>' : '')
+            + (w.verbGroup ? '<button class="stv-verb-group-badge" data-verb-group="' + escapeHtml(w.verbGroup) + '">' + escapeHtml(w.verbGroup) + '</button>' : '')
+            + (w.jlptLevel ? '<span class="stv-jlpt-badge stv-jlpt-' + w.jlptLevel.toLowerCase() + '">' + escapeHtml(w.jlptLevel) + '</span>' : '')
             + (w.meaning ? '<div class="stv-word-meaning">' + formatMeaningHtml(w.meaning) + '</div>' : '')
             + (w.examples && w.examples.length > 0
-                ? '<div class="stv-word-examples">' + w.examples.map(function(ex) {
+                ? '<div class="stv-word-examples">' + w.examples.map(function (ex) {
                     var sentence = getExampleSentence(ex);
                     var translation = getExampleTranslation(ex);
                     return '<div class="stv-example">' + escapeHtml(sentence)
@@ -1899,25 +2363,37 @@ function renderVocabList() {
             + '</div>';
     }).join('');
 
-    listEl.querySelectorAll('.stv-edit-btn').forEach(function(btn) {
-        btn.addEventListener('click', function(e) {
+    listEl.querySelectorAll('.stv-edit-btn').forEach(function (btn) {
+        btn.addEventListener('click', function (e) {
             e.stopPropagation();
             showWordInfoDialog(btn.dataset.id);
         });
     });
-    listEl.querySelectorAll('.stv-delete-btn').forEach(function(btn) {
-        btn.addEventListener('click', function(e) {
+    listEl.querySelectorAll('.stv-delete-btn').forEach(function (btn) {
+        btn.addEventListener('click', function (e) {
             e.stopPropagation();
             if (confirm('이 단어를 삭제하시겠습니까?')) {
                 removeVocabWord(btn.dataset.id);
                 toastr.info('단어 삭제됨');
-                setTimeout(function() { refreshVocabHighlightsInChat(); }, 100);
+                setTimeout(function () { refreshVocabHighlightsInChat(); }, 100);
             }
         });
     });
+    listEl.querySelectorAll('.stv-grammar-badge').forEach(function (btn) {
+        btn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            showGrammarInfoModal(btn.getAttribute('data-grammar'));
+        });
+    });
+    listEl.querySelectorAll('.stv-verb-group-badge').forEach(function (btn) {
+        btn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            showVerbGroupInfoModal(btn.getAttribute('data-verb-group'));
+        });
+    });
     if (multiSelectMode) {
-        listEl.querySelectorAll('.stv-word-card').forEach(function(card) {
-            card.addEventListener('click', function(e) {
+        listEl.querySelectorAll('.stv-word-card').forEach(function (card) {
+            card.addEventListener('click', function (e) {
                 // Don't toggle when clicking edit/delete buttons
                 if (e.target.closest('.stv-edit-btn') || e.target.closest('.stv-delete-btn')) return;
                 var id = card.dataset.id;
@@ -1982,9 +2458,9 @@ function getExampleTranslation(ex) {
 function formatMeaningHtml(text) {
     if (!text) return '';
     // Split by newlines, escape each line, join with <br>
-    return text.split('\n').map(function(line) {
+    return text.split('\n').map(function (line) {
         return escapeHtml(line.trim());
-    }).filter(function(l) { return l; }).join('<br>');
+    }).filter(function (l) { return l; }).join('<br>');
 }
 
 /**
@@ -2005,7 +2481,7 @@ function addExampleEntryRow(listEl, sentence, translation, hideTranslation) {
     removeBtn.className = 'stv-dlg-example-remove';
     removeBtn.title = '삭제';
     removeBtn.innerHTML = '<span class="fa-solid fa-xmark"></span>';
-    removeBtn.addEventListener('click', function() { entry.remove(); });
+    removeBtn.addEventListener('click', function () { entry.remove(); });
     sentenceRow.appendChild(sentenceInput);
     sentenceRow.appendChild(removeBtn);
     var translationInput = document.createElement('input');
@@ -2028,7 +2504,7 @@ function getExamplesFromList() {
     if (!listEl) return [];
     var entries = listEl.querySelectorAll('.stv-dlg-example-entry');
     var examples = [];
-    entries.forEach(function(entry) {
+    entries.forEach(function (entry) {
         var sentenceEl = entry.querySelector('.stv-dlg-example-sentence');
         var sentence = sentenceEl ? sentenceEl.value.trim() : '';
         if (!sentence) return;
@@ -2059,7 +2535,7 @@ function isCurrentWordKorean() {
  * Show read-only word info modal. "수정" button opens the edit dialog.
  */
 function showWordInfoDialog(wordId) {
-    var w = getVocab().find(function(v) { return v.id === wordId; });
+    var w = getVocab().find(function (v) { return v.id === wordId; });
     if (!w) return;
 
     var existingOverlay = document.getElementById('stv-info-overlay');
@@ -2068,7 +2544,7 @@ function showWordInfoDialog(wordId) {
     var examplesHtml = '';
     if (w.examples && w.examples.length > 0) {
         examplesHtml = '<div class="stv-info-section"><h4>예문</h4>';
-        w.examples.forEach(function(ex, idx) {
+        w.examples.forEach(function (ex, idx) {
             var sentence = getExampleSentence(ex);
             var translation = getExampleTranslation(ex);
             examplesHtml += '<div class="stv-info-example"><span class="stv-info-ex-num">' + (idx + 1) + '.</span> '
@@ -2079,20 +2555,36 @@ function showWordInfoDialog(wordId) {
         examplesHtml += '</div>';
     }
 
+    // Build kanji breakdown section
+    var kanjiHtml = '';
+    if (w.kanjiBreakdown && Array.isArray(w.kanjiBreakdown) && w.kanjiBreakdown.length > 0) {
+        kanjiHtml = '<div class="stv-info-section stv-kanji-section"><h4>한자 분해</h4>';
+        w.kanjiBreakdown.forEach(function (k) {
+            kanjiHtml += '<div class="stv-kanji-item">'
+                + '<span class="stv-kanji-char">' + escapeHtml(k.kanji || '') + '</span>'
+                + '<div class="stv-kanji-detail">'
+                + '<span class="stv-kanji-meaning">' + escapeHtml(k.meaning || '') + '</span>'
+                + (k.onyomi ? '<span class="stv-kanji-reading">음: ' + escapeHtml(k.onyomi) + '</span>' : '')
+                + (k.kunyomi ? '<span class="stv-kanji-reading">훈: ' + escapeHtml(k.kunyomi) + '</span>' : '')
+                + '</div></div>';
+        });
+        kanjiHtml += '</div>';
+    }
+
     // Build word forms section
     var wordFormsHtml = '';
     if (w.wordForms && typeof w.wordForms === 'object') {
-        var vocabWords = new Set(getVocab().map(function(v) { return v.word; }));
+        var vocabWords = new Set(getVocab().map(function (v) { return v.word; }));
         var formGroups = Object.keys(w.wordForms);
         if (formGroups.length > 0) {
             wordFormsHtml = '<div class="stv-info-section stv-wordforms-section"><h4>활용형</h4>';
-            formGroups.forEach(function(groupLabel) {
+            formGroups.forEach(function (groupLabel) {
                 var forms = w.wordForms[groupLabel];
                 if (!Array.isArray(forms) || forms.length === 0) return;
                 wordFormsHtml += '<div class="stv-wordforms-group">';
                 wordFormsHtml += '<span class="stv-wordforms-group-label">' + escapeHtml(groupLabel) + '</span>';
                 wordFormsHtml += '<div class="stv-wordforms-chips">';
-                forms.forEach(function(form) {
+                forms.forEach(function (form) {
                     var formWord = form.word || '';
                     var formLabel = form.label || '';
                     var inVocab = vocabWords.has(formWord);
@@ -2134,12 +2626,15 @@ function showWordInfoDialog(wordId) {
         + '</div>'
         + '<div class="stv-info-badges">'
         + (w.partOfSpeech ? '<span class="stv-pos-badge">' + escapeHtml(w.partOfSpeech) + '</span>' : '')
-        + '<span class="stv-lang-badge stv-lang-' + w.language + '">' + getLangLabel(w.language) + '</span>'
-        + (w.grammarInfo ? '<span class="stv-grammar-badge">' + escapeHtml(w.grammarInfo) + '</span>' : '')
+        + '<span class="stv-lang-badge stv-lang-' + w.language + '" style="display: flex; align-items: center; justify-content: center;">' + getLangLabel(w.language) + '</span>'
+        + (w.grammarInfo ? '<button class="stv-grammar-badge" data-grammar="' + escapeHtml(w.grammarInfo) + '">' + escapeHtml(w.grammarInfo) + '</button>' : '')
+        + (w.verbGroup ? '<button class="stv-verb-group-badge" data-verb-group="' + escapeHtml(w.verbGroup) + '">' + escapeHtml(w.verbGroup) + '</button>' : '')
+        + (w.jlptLevel ? '<span class="stv-jlpt-badge stv-jlpt-' + w.jlptLevel.toLowerCase() + '">' + escapeHtml(w.jlptLevel) + '</span>' : '')
         + '</div>'
         + baseFormHtml
         + (w.meaning ? '<div class="stv-info-section"><h4>뜻</h4><div class="stv-info-meaning">' + formatMeaningHtml(w.meaning) + '</div></div>' : '')
         + examplesHtml
+        + kanjiHtml
         + wordFormsHtml
         + '<div class="stv-info-meta"><span class="stv-date">추가일: ' + formatDate(w.addedAt) + '</span></div>'
         + '</div>'
@@ -2151,36 +2646,36 @@ function showWordInfoDialog(wordId) {
         + '</div></div></div>';
     document.body.appendChild(overlay);
 
-    var closeInfo = function() { overlay.remove(); };
+    var closeInfo = function () { overlay.remove(); };
     overlay.querySelector('.stv-dialog-close').addEventListener('click', closeInfo);
-    overlay.addEventListener('click', function(e) { if (e.target === overlay) closeInfo(); });
+    overlay.addEventListener('click', function (e) { if (e.target === overlay) closeInfo(); });
     document.getElementById('stv-info-close').addEventListener('click', closeInfo);
-    document.getElementById('stv-info-edit').addEventListener('click', function() {
+    document.getElementById('stv-info-edit').addEventListener('click', function () {
         closeInfo();
         showWordDialog(wordId);
     });
-    document.getElementById('stv-info-delete').addEventListener('click', function() {
+    document.getElementById('stv-info-delete').addEventListener('click', function () {
         if (!confirm('"' + w.word + '" 단어를 삭제하시겠습니까?')) return;
         removeVocabWord(wordId);
         closeInfo();
         toastr.info('"' + w.word + '" 삭제됨');
         renderVocabList();
-        setTimeout(function() { refreshVocabHighlightsInChat(); }, 100);
+        setTimeout(function () { refreshVocabHighlightsInChat(); }, 100);
     });
 
     // Base form button click handler
     var baseFormBtn = document.getElementById('stv-info-baseform-btn');
     if (baseFormBtn) {
-        baseFormBtn.addEventListener('click', function() {
+        baseFormBtn.addEventListener('click', function () {
             var baseWord = baseFormBtn.getAttribute('data-baseform');
             if (!baseWord) return;
-            var vocabItem = getVocab().find(function(v) { return v.word === baseWord; });
+            var vocabItem = getVocab().find(function (v) { return v.word === baseWord; });
             if (vocabItem) {
                 closeInfo();
                 showWordInfoDialog(vocabItem.id);
             } else {
                 closeInfo();
-                showWordDialog(null, {}).then(function() {
+                showWordDialog(null, {}).then(function () {
                     var wordInput = document.getElementById('stv-dlg-word');
                     if (wordInput) wordInput.value = baseWord;
                 });
@@ -2189,11 +2684,11 @@ function showWordInfoDialog(wordId) {
     }
 
     // Word form chip click handlers
-    overlay.querySelectorAll('.stv-wordform-chip').forEach(function(chip) {
-        chip.addEventListener('click', function() {
+    overlay.querySelectorAll('.stv-wordform-chip').forEach(function (chip) {
+        chip.addEventListener('click', function () {
             var formWord = chip.getAttribute('data-form-word');
             if (!formWord) return;
-            var vocabItem = getVocab().find(function(v) { return v.word === formWord; });
+            var vocabItem = getVocab().find(function (v) { return v.word === formWord; });
             if (vocabItem) {
                 // Already in vocab → show its info
                 closeInfo();
@@ -2201,11 +2696,27 @@ function showWordInfoDialog(wordId) {
             } else {
                 // Not in vocab → open add dialog prefilled
                 closeInfo();
-                showWordDialog(null, {}).then(function() {
+                showWordDialog(null, {}).then(function () {
                     var wordInput = document.getElementById('stv-dlg-word');
                     if (wordInput) wordInput.value = formWord;
                 });
             }
+        });
+    });
+
+    // Grammar badge click handler
+    overlay.querySelectorAll('.stv-grammar-badge').forEach(function (btn) {
+        btn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            showGrammarInfoModal(btn.getAttribute('data-grammar'));
+        });
+    });
+
+    // Verb group badge click handler
+    overlay.querySelectorAll('.stv-verb-group-badge').forEach(function (btn) {
+        btn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            showVerbGroupInfoModal(btn.getAttribute('data-verb-group'));
         });
     });
 }
@@ -2221,13 +2732,13 @@ async function showWordDialog(editId, opts) {
     var isEdit = !!editId;
     var existing = null;
     if (isEdit) {
-        existing = getVocab().find(function(w) { return w.id === editId; });
+        existing = getVocab().find(function (w) { return w.id === editId; });
         if (!existing) return;
     }
 
     var posOptions = ['명사', '동사', '형용사', '부사', '접속사', '조사', '감탄사', '대명사', '전치사', '조동사', '연체사', '접미사', '접두사', '기타'];
     var posHtml = '<option value="">선택...</option>';
-    posOptions.forEach(function(p) {
+    posOptions.forEach(function (p) {
         posHtml += '<option value="' + p + '"' + ((existing && existing.partOfSpeech === p) ? ' selected' : '') + '>' + p + '</option>';
     });
 
@@ -2251,7 +2762,7 @@ async function showWordDialog(editId, opts) {
     ];
     var currentLang = isEdit && existing ? (existing.language || 'auto') : 'auto';
     var langSelectHtml = '';
-    langOptions.forEach(function(opt) {
+    langOptions.forEach(function (opt) {
         langSelectHtml += '<option value="' + opt.val + '"' + (opt.val === currentLang ? ' selected' : '') + '>' + opt.label + '</option>';
     });
 
@@ -2277,6 +2788,17 @@ async function showWordDialog(editId, opts) {
         + '<div class="stv-field"><label>품사</label><select id="stv-dlg-pos">' + posHtml + '</select></div>'
         + '<div class="stv-field"><label>문법 정보 (활용형)</label>'
         + '<input type="text" id="stv-dlg-grammar" value="' + escapeHtml(existing ? (existing.grammarInfo || '') : '') + '" placeholder="예: 과거형, 수동형, て형 등" /></div>'
+        + '<div class="stv-field-row">'
+        + '<div class="stv-field stv-field-half"><label>동사 그룹</label>'
+        + '<select id="stv-dlg-verb-group"><option value="">없음</option>'
+        + ['五段', '一段', 'サ変', 'カ変'].map(function (g) {
+            return '<option value="' + g + '"' + ((existing && existing.verbGroup === g) ? ' selected' : '') + '>' + g + '</option>';
+        }).join('') + '</select></div>'
+        + '<div class="stv-field stv-field-half"><label>JLPT</label>'
+        + '<select id="stv-dlg-jlpt"><option value="">없음</option>'
+        + ['N5', 'N4', 'N3', 'N2', 'N1'].map(function (lv) {
+            return '<option value="' + lv + '"' + ((existing && existing.jlptLevel === lv) ? ' selected' : '') + '>' + lv + '</option>';
+        }).join('') + '</select></div></div>'
         + contextHtml
         + '<div class="stv-field stv-examples-field"><label>예문</label>'
         + '<div id="stv-dlg-examples-list" class="stv-dlg-examples-list"></div>'
@@ -2294,20 +2816,20 @@ async function showWordDialog(editId, opts) {
         + '<button class="stv-btn stv-btn-save">저장</button></div></div>';
     document.body.appendChild(overlay);
 
-    var closeDialog = function() { overlay.remove(); };
+    var closeDialog = function () { overlay.remove(); };
     overlay.querySelector('.stv-dialog-close').addEventListener('click', closeDialog);
     overlay.querySelector('.stv-btn-cancel').addEventListener('click', closeDialog);
 
     // Populate existing examples
     var examplesList = document.getElementById('stv-dlg-examples-list');
     var existingExamples = existing && existing.examples ? existing.examples : [];
-    existingExamples.forEach(function(ex) {
+    existingExamples.forEach(function (ex) {
         var sentence = typeof ex === 'string' ? ex : (ex.sentence || '');
         var translation = typeof ex === 'string' ? '' : (ex.translation || '');
         addExampleEntryRow(examplesList, sentence, translation, isCurrentWordKorean());
     });
 
-    document.getElementById('stv-dlg-add-example-row').addEventListener('click', function() {
+    document.getElementById('stv-dlg-add-example-row').addEventListener('click', function () {
         addExampleEntryRow(examplesList, '', '', isCurrentWordKorean());
         var entries = examplesList.querySelectorAll('.stv-dlg-example-entry');
         var lastEntry = entries[entries.length - 1];
@@ -2315,9 +2837,9 @@ async function showWordDialog(editId, opts) {
     });
 
     // Language change → toggle translation input visibility
-    document.getElementById('stv-dlg-lang').addEventListener('change', function() {
+    document.getElementById('stv-dlg-lang').addEventListener('change', function () {
         var isKo = isCurrentWordKorean();
-        examplesList.querySelectorAll('.stv-dlg-example-translation').forEach(function(el) {
+        examplesList.querySelectorAll('.stv-dlg-example-translation').forEach(function (el) {
             el.style.display = isKo ? 'none' : '';
         });
         var ctxTrans = document.getElementById('stv-dlg-context-translation');
@@ -2327,9 +2849,10 @@ async function showWordDialog(editId, opts) {
     // Track whether AI analysis was used and detected base form
     var detectedBaseForm = null;
     var detectedWordForms = null;
+    var detectedKanjiBreakdown = null;
 
     // ── Base form find button ──
-    overlay.querySelector('#stv-dlg-find-baseform').addEventListener('click', async function() {
+    overlay.querySelector('#stv-dlg-find-baseform').addEventListener('click', async function () {
         var wordInput = document.getElementById('stv-dlg-word');
         var wordVal = wordInput ? wordInput.value.trim() : '';
         if (!wordVal) { toastr.warning('먼저 단어를 입력하세요.'); return; }
@@ -2359,7 +2882,7 @@ async function showWordDialog(editId, opts) {
     });
 
     // AI Analyze
-    overlay.querySelector('#stv-dlg-analyze').addEventListener('click', async function() {
+    overlay.querySelector('#stv-dlg-analyze').addEventListener('click', async function () {
         var wordInput = document.getElementById('stv-dlg-word');
         var wordVal = wordInput ? wordInput.value.trim() : '';
         if (!wordVal) { toastr.warning('먼저 단어를 입력하세요.'); return; }
@@ -2371,71 +2894,80 @@ async function showWordDialog(editId, opts) {
         var langSel = document.getElementById('stv-dlg-lang');
         var selectedLang = langSel ? langSel.value : 'auto';
         try {
-        // Run word analysis and base form detection in parallel
-        var [result, baseForm] = await Promise.all([
-            analyzeWordWithLLM(wordVal, selectedLang),
-            detectBaseForm(wordVal, selectedLang),
-        ]);
-        if (result) {
-            // Determine effective language for reading normalization
-            var effectiveLang = (selectedLang !== 'auto') ? selectedLang : detectLanguage(wordVal, result.reading);
-            if (result.reading) document.getElementById('stv-dlg-reading').value = normalizeReading(result.reading, effectiveLang);
-            if (result.meaning) document.getElementById('stv-dlg-meaning').value = result.meaning;
-            if (result.partOfSpeech) {
-                var normalized = normalizePartOfSpeech(result.partOfSpeech);
-                var sel = document.getElementById('stv-dlg-pos');
-                var found = false;
-                for (var i = 0; i < sel.options.length; i++) {
-                    if (sel.options[i].value === normalized) { found = true; sel.value = normalized; break; }
-                }
-                if (!found && normalized) {
-                    // Add as new option if not in list
-                    var opt = document.createElement('option');
-                    opt.value = normalized;
-                    opt.textContent = normalized;
-                    opt.selected = true;
-                    sel.insertBefore(opt, sel.lastElementChild); // before "기타"
-                }
-            }
-            if (result.grammarInfo) {
-                var grammarEl = document.getElementById('stv-dlg-grammar');
-                if (grammarEl) grammarEl.value = result.grammarInfo;
-            }
-            if (result.examples && Array.isArray(result.examples)) {
-                var exList = document.getElementById('stv-dlg-examples-list');
-                if (exList) {
-                    exList.innerHTML = '';
-                    var isKo = isCurrentWordKorean();
-                    result.examples.forEach(function(ex) {
-                        var sentence = typeof ex === 'object' ? (ex.sentence || '') : String(ex);
-                        var translation = typeof ex === 'object' ? (ex.translation || '') : '';
-                        addExampleEntryRow(exList, sentence, translation, isKo);
-                    });
-                }
-            }
-            // Translate context sentence if present (skip for Korean)
-            var useContextEl = document.getElementById('stv-dlg-use-context');
-            var contextEl = document.getElementById('stv-dlg-context-sentence');
-            var ctxTransEl = document.getElementById('stv-dlg-context-translation');
-            if (!isCurrentWordKorean() && useContextEl && useContextEl.checked && contextEl && contextEl.value.trim() && ctxTransEl && !ctxTransEl.value.trim()) {
-                try {
-                    var transPrompt = 'Translate the following sentence to Korean. Return ONLY the Korean translation, nothing else.\n\nSentence: ' + contextEl.value.trim() + '\n\nTranslation:';
-                    var translation = await callLLM(transPrompt);
-                    if (translation && translation.trim()) {
-                        ctxTransEl.value = translation.trim();
+            // Run word analysis and base form detection in parallel
+            var [result, baseForm] = await Promise.all([
+                analyzeWordWithLLM(wordVal, selectedLang),
+                detectBaseForm(wordVal, selectedLang),
+            ]);
+            if (result) {
+                // Determine effective language for reading normalization
+                var effectiveLang = (selectedLang !== 'auto') ? selectedLang : detectLanguage(wordVal, result.reading);
+                if (result.reading) document.getElementById('stv-dlg-reading').value = normalizeReading(result.reading, effectiveLang);
+                if (result.meaning) document.getElementById('stv-dlg-meaning').value = result.meaning;
+                if (result.partOfSpeech) {
+                    var normalized = normalizePartOfSpeech(result.partOfSpeech);
+                    var sel = document.getElementById('stv-dlg-pos');
+                    var found = false;
+                    for (var i = 0; i < sel.options.length; i++) {
+                        if (sel.options[i].value === normalized) { found = true; sel.value = normalized; break; }
                     }
-                } catch (e) { /* ignore translation failure */ }
+                    if (!found && normalized) {
+                        // Add as new option if not in list
+                        var opt = document.createElement('option');
+                        opt.value = normalized;
+                        opt.textContent = normalized;
+                        opt.selected = true;
+                        sel.insertBefore(opt, sel.lastElementChild); // before "기타"
+                    }
+                }
+                if (result.grammarInfo) {
+                    var grammarEl = document.getElementById('stv-dlg-grammar');
+                    if (grammarEl) grammarEl.value = result.grammarInfo;
+                }
+                if (result.verbGroup) {
+                    var vgSel = document.getElementById('stv-dlg-verb-group');
+                    if (vgSel) vgSel.value = result.verbGroup;
+                }
+                if (result.jlptLevel) {
+                    var jlptSel = document.getElementById('stv-dlg-jlpt');
+                    if (jlptSel) jlptSel.value = result.jlptLevel;
+                }
+                if (result.examples && Array.isArray(result.examples)) {
+                    var exList = document.getElementById('stv-dlg-examples-list');
+                    if (exList) {
+                        exList.innerHTML = '';
+                        var isKo = isCurrentWordKorean();
+                        result.examples.forEach(function (ex) {
+                            var sentence = typeof ex === 'object' ? (ex.sentence || '') : String(ex);
+                            var translation = typeof ex === 'object' ? (ex.translation || '') : '';
+                            addExampleEntryRow(exList, sentence, translation, isKo);
+                        });
+                    }
+                }
+                // Translate context sentence if present (skip for Korean)
+                var useContextEl = document.getElementById('stv-dlg-use-context');
+                var contextEl = document.getElementById('stv-dlg-context-sentence');
+                var ctxTransEl = document.getElementById('stv-dlg-context-translation');
+                if (!isCurrentWordKorean() && useContextEl && useContextEl.checked && contextEl && contextEl.value.trim() && ctxTransEl && !ctxTransEl.value.trim()) {
+                    try {
+                        var transPrompt = 'Translate the following sentence to Korean. Return ONLY the Korean translation, nothing else.\n\nSentence: ' + contextEl.value.trim() + '\n\nTranslation:';
+                        var translation = await callLLM(transPrompt);
+                        if (translation && translation.trim()) {
+                            ctxTransEl.value = translation.trim();
+                        }
+                    } catch (e) { /* ignore translation failure */ }
+                }
+                toastr.success('AI 분석 완료!');
+            } else {
+                toastr.error('AI 분석에 실패했습니다.');
             }
-            toastr.success('AI 분석 완료!');
-        } else {
-            toastr.error('AI 분석에 실패했습니다.');
-        }
-        detectedBaseForm = baseForm;
-        // Fallback: use baseForm from analysis result if detectBaseForm returned null
-        if (!detectedBaseForm && result && result.baseForm && result.baseForm !== wordVal && result.baseForm.trim()) {
-            detectedBaseForm = result.baseForm.trim();
-        }
-        detectedWordForms = (result && result.wordForms && typeof result.wordForms === 'object') ? result.wordForms : null;
+            detectedBaseForm = baseForm;
+            // Fallback: use baseForm from analysis result if detectBaseForm returned null
+            if (!detectedBaseForm && result && result.baseForm && result.baseForm !== wordVal && result.baseForm.trim()) {
+                detectedBaseForm = result.baseForm.trim();
+            }
+            detectedWordForms = (result && result.wordForms && typeof result.wordForms === 'object') ? result.wordForms : null;
+            detectedKanjiBreakdown = (result && result.kanjiBreakdown && Array.isArray(result.kanjiBreakdown)) ? result.kanjiBreakdown : null;
 
         } catch (e) {
             console.error('[ST-Vocabulary] AI analyze error:', e);
@@ -2446,7 +2978,7 @@ async function showWordDialog(editId, opts) {
     });
 
     // AI Add Examples
-    overlay.querySelector('#stv-dlg-add-examples').addEventListener('click', async function() {
+    overlay.querySelector('#stv-dlg-add-examples').addEventListener('click', async function () {
         var wordInput = document.getElementById('stv-dlg-word');
         var wordVal = wordInput ? wordInput.value.trim() : '';
         if (!wordVal) { toastr.warning('먼저 단어를 입력하세요.'); return; }
@@ -2454,23 +2986,23 @@ async function showWordDialog(editId, opts) {
         addExBtn.disabled = true;
         addExBtn.innerHTML = '<span class="fa-solid fa-spinner fa-spin"></span> 예문 생성 중...';
         try {
-        var existingParsed = getExamplesFromList();
-        var newExamples = await generateExamplesWithLLM(wordVal, existingParsed, (function() {
-            var ls = document.getElementById('stv-dlg-lang');
-            return ls ? ls.value : 'auto';
-        })());
-        if (newExamples && newExamples.length > 0) {
-            var exList = document.getElementById('stv-dlg-examples-list');
-            if (exList) {
-                var isKo = isCurrentWordKorean();
-                newExamples.forEach(function(ex) {
-                    addExampleEntryRow(exList, ex.sentence || '', ex.translation || '', isKo);
-                });
+            var existingParsed = getExamplesFromList();
+            var newExamples = await generateExamplesWithLLM(wordVal, existingParsed, (function () {
+                var ls = document.getElementById('stv-dlg-lang');
+                return ls ? ls.value : 'auto';
+            })());
+            if (newExamples && newExamples.length > 0) {
+                var exList = document.getElementById('stv-dlg-examples-list');
+                if (exList) {
+                    var isKo = isCurrentWordKorean();
+                    newExamples.forEach(function (ex) {
+                        addExampleEntryRow(exList, ex.sentence || '', ex.translation || '', isKo);
+                    });
+                }
+                toastr.success(newExamples.length + '개 예문 추가됨');
+            } else {
+                toastr.error('예문 생성에 실패했습니다.');
             }
-            toastr.success(newExamples.length + '개 예문 추가됨');
-        } else {
-            toastr.error('예문 생성에 실패했습니다.');
-        }
         } catch (e) {
             console.error('[ST-Vocabulary] AI examples error:', e);
             toastr.error('예문 생성 중 오류 발생');
@@ -2480,7 +3012,7 @@ async function showWordDialog(editId, opts) {
     });
 
     // Save
-    overlay.querySelector('.stv-btn-save').addEventListener('click', async function() {
+    overlay.querySelector('.stv-btn-save').addEventListener('click', async function () {
         var wordEl = document.getElementById('stv-dlg-word');
         var word = wordEl ? wordEl.value.trim() : '';
         if (!word) { toastr.warning('단어를 입력하세요.'); return; }
@@ -2492,6 +3024,10 @@ async function showWordDialog(editId, opts) {
         var partOfSpeech = posEl2 ? posEl2.value : '';
         var grammarEl = document.getElementById('stv-dlg-grammar');
         var grammarInfo = grammarEl ? grammarEl.value.trim() : '';
+        var vgSel2 = document.getElementById('stv-dlg-verb-group');
+        var verbGroup = vgSel2 ? vgSel2.value : '';
+        var jlptSel2 = document.getElementById('stv-dlg-jlpt');
+        var jlptLevel = jlptSel2 ? jlptSel2.value : '';
         var extraExamples = getExamplesFromList();
         var examples = [];
         var useContext = document.getElementById('stv-dlg-use-context');
@@ -2511,21 +3047,23 @@ async function showWordDialog(editId, opts) {
         var finalLang = (selectedLang !== 'auto') ? selectedLang : detectLanguage(word, reading);
 
         if (isEdit) {
-            var editUpdates = { word: word, reading: reading, meaning: meaning, partOfSpeech: partOfSpeech, grammarInfo: grammarInfo, examples: examples, language: finalLang };
+            var editUpdates = { word: word, reading: reading, meaning: meaning, partOfSpeech: partOfSpeech, grammarInfo: grammarInfo, examples: examples, language: finalLang, verbGroup: verbGroup || null, jlptLevel: jlptLevel || null };
             if (detectedWordForms) editUpdates.wordForms = detectedWordForms;
             if (detectedBaseForm) editUpdates.baseForm = detectedBaseForm;
+            if (detectedKanjiBreakdown) editUpdates.kanjiBreakdown = detectedKanjiBreakdown;
             updateVocabWord(editId, editUpdates);
             toastr.success('"' + word + '" 수정 완료');
         } else {
-            var addData = { word: word, reading: reading, meaning: meaning, partOfSpeech: partOfSpeech, grammarInfo: grammarInfo, examples: examples, language: finalLang, source: 'manual' };
+            var addData = { word: word, reading: reading, meaning: meaning, partOfSpeech: partOfSpeech, grammarInfo: grammarInfo, examples: examples, language: finalLang, source: 'manual', verbGroup: verbGroup || null, jlptLevel: jlptLevel || null };
             if (detectedWordForms) addData.wordForms = detectedWordForms;
             if (detectedBaseForm) addData.baseForm = detectedBaseForm;
+            if (detectedKanjiBreakdown) addData.kanjiBreakdown = detectedKanjiBreakdown;
             addVocabWord(addData);
             toastr.success('"' + word + '" 단어장에 추가됨');
         }
         closeDialog();
         // Re-highlight vocab words in chat after add/edit
-        setTimeout(function() { refreshVocabHighlightsInChat(); }, 100);
+        setTimeout(function () { refreshVocabHighlightsInChat(); }, 100);
 
         // Detect and suggest base form (after dialog closed)
         if (!isEdit) {
@@ -2549,7 +3087,7 @@ async function showWordDialog(editId, opts) {
         }
     });
 
-    setTimeout(function() { var el = document.getElementById('stv-dlg-word'); if (el) el.focus(); }, 100);
+    setTimeout(function () { var el = document.getElementById('stv-dlg-word'); if (el) el.focus(); }, 100);
 }
 
 // ── Vocab Highlight Click Delegation ──────────────────
@@ -2560,7 +3098,7 @@ async function showWordDialog(editId, opts) {
  * DOM changes, re-renders, or timing issues.
  */
 function setupVocabHighlightClickDelegation() {
-    document.addEventListener('click', function(e) {
+    document.addEventListener('click', function (e) {
         // Check for .stv-vocab-hl-span click
         var hlSpan = e.target.closest('.stv-vocab-hl-span[data-stv-word]');
         if (!hlSpan) {
@@ -2577,7 +3115,7 @@ function setupVocabHighlightClickDelegation() {
         if (!wordText) return;
 
         // Check if this word is individually saved in vocab
-        var vocabItem = getVocab().find(function(v) { return v.word === wordText; });
+        var vocabItem = getVocab().find(function (v) { return v.word === wordText; });
         if (vocabItem) {
             showWordInfoDialog(vocabItem.id);
             return;
@@ -2586,7 +3124,7 @@ function setupVocabHighlightClickDelegation() {
         // Check if this is a conjugated form mapping to a base word
         var baseId = hlSpan.getAttribute('data-stv-base-id');
         if (baseId) {
-            var baseItem = getVocab().find(function(v) { return v.id === baseId; });
+            var baseItem = getVocab().find(function (v) { return v.id === baseId; });
             if (baseItem) {
                 showWordInfoDialog(baseItem.id);
                 return;
@@ -2597,34 +3135,62 @@ function setupVocabHighlightClickDelegation() {
 
 // ── Furigana Edit Click Delegation ────────────────────
 
+var _furiganaEditActive = false;
+
 function closeFuriganaEditPopup() {
-    document.querySelectorAll('.stv-furigana-edit-popup').forEach(function(p) { p.remove(); });
+    document.querySelectorAll('.stv-furigana-edit-popup').forEach(function (p) { p.remove(); });
+    _furiganaEditActive = false;
 }
 
 function setupFuriganaEditDelegation() {
-    document.addEventListener('click', function(e) {
-        // Check if furigana edit on click is enabled
+    // Track mousedown on .stv-ruby to detect simple clicks vs drags
+    var _mdRuby = null;   // the ruby element pressed on mousedown
+    var _mdX = 0, _mdY = 0; // mousedown coordinates
+
+    // Phase 1: record mousedown target
+    document.addEventListener('mousedown', function (e) {
+        _mdRuby = null;
         var _s = getSettings();
         if (!_s.furiganaEditOnClick) return;
 
-        // Only handle .stv-ruby clicks (not vocab-highlighted ones — those go to info dialog)
         var ruby = e.target.closest('.stv-ruby');
         if (!ruby) return;
         if (ruby.classList.contains('stv-vocab-highlight')) return;
         if (!ruby.closest('#chat .mes .mes_text')) return;
 
-        // If text is selected (drag), don't open edit popup — let selection tooltip handle it
-        var sel = window.getSelection();
-        if (sel && sel.toString().trim().length > 0) return;
+        _mdRuby = ruby;
+        _mdX = e.clientX;
+        _mdY = e.clientY;
+    }, true);
+
+    // Phase 2: on mouseup, if it was a simple click (not drag) on .stv-ruby,
+    // clear selection and show edit popup BEFORE other extensions see the event
+    document.addEventListener('mouseup', function (e) {
+        if (!_mdRuby) return;
+        var ruby = _mdRuby;
+        _mdRuby = null;
+
+        // Check if this is a simple click (not a drag): mouse moved < 5px
+        var dx = e.clientX - _mdX, dy = e.clientY - _mdY;
+        if (Math.sqrt(dx * dx + dy * dy) > 5) return;
+
+        // Verify mouseup target is still within the same ruby or its children
+        var upRuby = e.target.closest('.stv-ruby');
+        if (upRuby !== ruby) return;
+
+        // Clear any browser-created selection immediately, before other extensions see it
+        if (window.getSelection()) window.getSelection().removeAllRanges();
 
         e.stopPropagation();
+        e.stopImmediatePropagation();
         e.preventDefault();
 
         closeFuriganaEditPopup();
         closeFuriganaPopupMenus();
+        _furiganaEditActive = true;
 
         var rtEl = ruby.querySelector('rt');
-        if (!rtEl) return;
+        if (!rtEl) { _furiganaEditActive = false; return; }
         var currentReading = rtEl.textContent;
         var word = ruby.getAttribute('data-stv-word') || ruby.firstChild.textContent;
 
@@ -2648,7 +3214,7 @@ function setupFuriganaEditDelegation() {
         popup.style.left = (rect.left + window.scrollX + rect.width / 2) + 'px';
 
         // Clamp to viewport edges
-        requestAnimationFrame(function() {
+        requestAnimationFrame(function () {
             var pr = popup.getBoundingClientRect();
             if (pr.left < 4) popup.style.left = (4 + pr.width / 2) + 'px';
             if (pr.right > window.innerWidth - 4) popup.style.left = (window.innerWidth - 4 - pr.width / 2 + window.scrollX) + 'px';
@@ -2679,21 +3245,21 @@ function setupFuriganaEditDelegation() {
                     // Use getCleanText to avoid including ruby readings in hash
                     var editMesText = mesEl.querySelector('.mes_text');
                     saveFuriganaForMessage(mesId, readings, editMesText ? getCleanText(editMesText) : '');
-                } catch(_) {}
+                } catch (_) { }
             }
             closeFuriganaEditPopup();
             toastr.success(word + ' → ' + newReading);
         }
 
-        confirmBtn.addEventListener('click', function(ev) { ev.stopPropagation(); applyEdit(); });
-        input.addEventListener('keydown', function(ev) {
+        confirmBtn.addEventListener('click', function (ev) { ev.stopPropagation(); applyEdit(); });
+        input.addEventListener('keydown', function (ev) {
             if (ev.key === 'Enter') { ev.preventDefault(); applyEdit(); }
             if (ev.key === 'Escape') { closeFuriganaEditPopup(); }
         });
 
         // Close on outside click
-        setTimeout(function() {
-            var closeHandler = function(ev) {
+        setTimeout(function () {
+            var closeHandler = function (ev) {
                 if (!popup.contains(ev.target)) {
                     closeFuriganaEditPopup();
                     document.removeEventListener('mousedown', closeHandler, true);
@@ -2701,7 +3267,7 @@ function setupFuriganaEditDelegation() {
             };
             document.addEventListener('mousedown', closeHandler, true);
         }, 0);
-    }, true);
+    }, true); // useCapture: fires before jQuery/delegated handlers
 }
 
 // ── Text Selection → Vocab Add ────────────────────────
@@ -2715,151 +3281,156 @@ function setupTextSelection() {
 
     function showTooltipForSelection(e) {
         if (selectionTooltip && selectionTooltip.contains(e.target)) return;
+        // If furigana edit popup is active, don't show selection tooltip
+        if (_furiganaEditActive) return;
         var chatEl = document.getElementById('chat');
         if (!chatEl || !chatEl.contains(e.target)) { removeTooltip(); return; }
 
         // Small delay for mobile to let selection finalize
-        setTimeout(function() {
-        var selection = window.getSelection();
-        var selectedText = selection ? selection.toString().trim() : '';
-        if (!selectedText || selectedText.length === 0 || selectedText.length > 100) { removeTooltip(); return; }
+        setTimeout(function () {
+            // If furigana edit popup was opened by the click handler (fires after mouseup), skip
+            if (_furiganaEditActive) return;
 
-        // Close furigana edit popup if open — selection tooltip takes priority
-        closeFuriganaEditPopup();
+            var selection = window.getSelection();
+            var selectedText = selection ? selection.toString().trim() : '';
+            if (!selectedText || selectedText.length === 0 || selectedText.length > 100) { removeTooltip(); return; }
 
-        removeTooltip();
-        var range = selection.getRangeAt(0);
-        var rect = range.getBoundingClientRect();
+            // Close furigana edit popup if open — selection tooltip takes priority
+            closeFuriganaEditPopup();
 
-        selectionTooltip = document.createElement('div');
-        selectionTooltip.className = 'stv-selection-tooltip';
-        selectionTooltip.innerHTML = '<button class="stv-tooltip-btn stv-tooltip-vocab" title="단어장에 추가"><span class="fa-solid fa-book-bookmark"></span> 단어장에 추가</button>'
-            + '<button class="stv-tooltip-btn stv-tooltip-furigana" title="후리가나 달기"><span class="fa-solid fa-language"></span> 후리가나</button>';
-        // Capture sentence and word now (selection is a live object that clears on button click)
-        var capturedWord = getCleanSelectedText(selection) || selectedText;
-        var capturedSentence = extractSentenceFromSelection(selection);
-
-        selectionTooltip.style.top = (rect.top + window.scrollY - 40) + 'px';
-        // left will be set after measuring width in rAF
-        document.body.appendChild(selectionTooltip);
-
-        // Measure and clamp to viewport
-        requestAnimationFrame(function() {
-            if (!selectionTooltip) return;
-            var tw = selectionTooltip.offsetWidth;
-            // Center tooltip on selection, then clamp
-            var centerX = rect.left + window.scrollX + (rect.width / 2);
-            var left = centerX - (tw / 2);
-            // Clamp left edge
-            if (left < 4 + window.scrollX) left = 4 + window.scrollX;
-            // Clamp right edge
-            if (left + tw > window.scrollX + window.innerWidth - 4) {
-                left = window.scrollX + window.innerWidth - 4 - tw;
-            }
-            selectionTooltip.style.left = left + 'px';
-
-            // Top edge overflow → show below selection instead
-            var tr = selectionTooltip.getBoundingClientRect();
-            if (tr.top < 4) {
-                selectionTooltip.style.top = (rect.bottom + window.scrollY + 4) + 'px';
-            }
-        });
-
-        // Vocab add button
-        selectionTooltip.querySelector('.stv-tooltip-vocab').addEventListener('click', async function(ev) {
-            ev.stopPropagation();
             removeTooltip();
-            if (window.getSelection()) window.getSelection().removeAllRanges();
-            await showWordDialog(null, { contextSentence: capturedSentence });
-            var wordInput = document.getElementById('stv-dlg-word');
-            if (wordInput) {
-                wordInput.value = capturedWord;
-            }
-        });
+            var range = selection.getRangeAt(0);
+            var rect = range.getBoundingClientRect();
 
-        // Furigana add button
-        var savedRange = range.cloneRange();
-        selectionTooltip.querySelector('.stv-tooltip-furigana').addEventListener('click', async function(ev) {
-            ev.stopPropagation();
-            var word = selectedText;
-            removeTooltip();
-            if (window.getSelection()) window.getSelection().removeAllRanges();
+            selectionTooltip = document.createElement('div');
+            selectionTooltip.className = 'stv-selection-tooltip';
+            selectionTooltip.innerHTML = '<button class="stv-tooltip-btn stv-tooltip-vocab" title="단어장에 추가"><span class="fa-solid fa-book-bookmark"></span> 단어장에 추가</button>'
+                + '<button class="stv-tooltip-btn stv-tooltip-furigana" title="후리가나 달기"><span class="fa-solid fa-language"></span> 후리가나</button>';
+            // Capture sentence and word now (selection is a live object that clears on button click)
+            var capturedWord = getCleanSelectedText(selection) || selectedText;
+            var capturedSentence = extractSentenceFromSelection(selection);
 
-            // Show progress snackbar
-            showFuriganaProgressSnackbar('drag', '"' + word + '" 후리가나 생성 중...');
+            selectionTooltip.style.top = (rect.top + window.scrollY - 40) + 'px';
+            // left will be set after measuring width in rAF
+            document.body.appendChild(selectionTooltip);
 
-            try {
-                // Get reading from LLM
-                var prompt = 'You are a Japanese reading tool. Give the hiragana reading for this word/phrase.\n'
-                    + 'Return ONLY a JSON object: {"word":"' + word + '","reading":"<hiragana reading>"}\n'
-                    + 'If the text is already hiragana, return the same text as reading.\n'
-                    + 'If the text is katakana, return hiragana equivalent.\n'
-                    + 'Word: ' + word + '\nJSON:';
-                var resp = await callLLM(prompt);
-                var match = resp.match(/\{[\s\S]*?\}/);
-                if (!match) { hideFuriganaProgressSnackbar(); toastr.error('후리가나 생성 실패'); return; }
-                var result = JSON.parse(match[0]);
-                if (!result.reading) { hideFuriganaProgressSnackbar(); toastr.error('읽기 정보를 가져올 수 없습니다.'); return; }
+            // Measure and clamp to viewport
+            requestAnimationFrame(function () {
+                if (!selectionTooltip) return;
+                var tw = selectionTooltip.offsetWidth;
+                // Center tooltip on selection, then clamp
+                var centerX = rect.left + window.scrollX + (rect.width / 2);
+                var left = centerX - (tw / 2);
+                // Clamp left edge
+                if (left < 4 + window.scrollX) left = 4 + window.scrollX;
+                // Clamp right edge
+                if (left + tw > window.scrollX + window.innerWidth - 4) {
+                    left = window.scrollX + window.innerWidth - 4 - tw;
+                }
+                selectionTooltip.style.left = left + 'px';
 
-                // Find the text in the message and wrap with ruby
-                var mesTextEl = savedRange.startContainer;
-                while (mesTextEl && !mesTextEl.classList) mesTextEl = mesTextEl.parentNode;
-                var mesEl = mesTextEl ? mesTextEl.closest('.mes') : null;
-                if (!mesEl) { toastr.error('메시지를 찾을 수 없습니다.'); return; }
-                var mesText = mesEl.querySelector('.mes_text');
-                if (!mesText) return;
+                // Top edge overflow → show below selection instead
+                var tr = selectionTooltip.getBoundingClientRect();
+                if (tr.top < 4) {
+                    selectionTooltip.style.top = (rect.bottom + window.scrollY + 4) + 'px';
+                }
+            });
 
-                // Store original if not already stored
-                if (!mesText.dataset.stvOriginalHtml) {
+            // Vocab add button
+            selectionTooltip.querySelector('.stv-tooltip-vocab').addEventListener('click', async function (ev) {
+                ev.stopPropagation();
+                removeTooltip();
+                if (window.getSelection()) window.getSelection().removeAllRanges();
+                await showWordDialog(null, { contextSentence: capturedSentence });
+                var wordInput = document.getElementById('stv-dlg-word');
+                if (wordInput) {
+                    wordInput.value = capturedWord;
+                }
+            });
+
+            // Furigana add button
+            var savedRange = range.cloneRange();
+            selectionTooltip.querySelector('.stv-tooltip-furigana').addEventListener('click', async function (ev) {
+                ev.stopPropagation();
+                var word = selectedText;
+                removeTooltip();
+                if (window.getSelection()) window.getSelection().removeAllRanges();
+
+                // Show progress snackbar
+                showFuriganaProgressSnackbar('drag', '"' + word + '" 후리가나 생성 중...');
+
+                try {
+                    // Get reading from LLM
+                    var prompt = 'You are a Japanese reading tool. Give the hiragana reading for this word/phrase.\n'
+                        + 'Return ONLY a JSON object: {"word":"' + word + '","reading":"<hiragana reading>"}\n'
+                        + 'If the text is already hiragana, return the same text as reading.\n'
+                        + 'If the text is katakana, return hiragana equivalent.\n'
+                        + 'Word: ' + word + '\nJSON:';
+                    var resp = await callLLM(prompt);
+                    var match = resp.match(/\{[\s\S]*?\}/);
+                    if (!match) { hideFuriganaProgressSnackbar(); toastr.error('후리가나 생성 실패'); return; }
+                    var result = JSON.parse(match[0]);
+                    if (!result.reading) { hideFuriganaProgressSnackbar(); toastr.error('읽기 정보를 가져올 수 없습니다.'); return; }
+
+                    // Find the text in the message and wrap with ruby
+                    var mesTextEl = savedRange.startContainer;
+                    while (mesTextEl && !mesTextEl.classList) mesTextEl = mesTextEl.parentNode;
+                    var mesEl = mesTextEl ? mesTextEl.closest('.mes') : null;
+                    if (!mesEl) { toastr.error('메시지를 찾을 수 없습니다.'); return; }
+                    var mesText = mesEl.querySelector('.mes_text');
+                    if (!mesText) return;
+
+                    // Store original if not already stored
+                    if (!mesText.dataset.stvOriginalHtml) {
+                        mesText.dataset.stvOriginalHtml = mesText.innerHTML;
+                    }
+
+                    // Collect existing readings and add new one
+                    var existingReadings = [];
+                    try { existingReadings = JSON.parse(mesEl.dataset.stvFuriganaReadings || '[]'); } catch (_) { }
+                    // Remove any prior entry for this word (so new reading overrides)
+                    existingReadings = existingReadings.filter(function (r) { return r.word !== word; });
+                    existingReadings.push({ word: word, reading: result.reading });
+
+                    // Restore original HTML and re-apply all readings together
+                    // This ensures the selected word (possibly inside <ruby> from prior generation) is found
+                    if (mesText.dataset.stvOriginalHtml) {
+                        mesText.innerHTML = mesText.dataset.stvOriginalHtml;
+                    }
+                    // Capture clean text BEFORE applying furigana (for accurate textHash on save)
+                    var cleanTextForHash = mesText.textContent;
                     mesText.dataset.stvOriginalHtml = mesText.innerHTML;
+                    applyFuriganaToElement(mesText, existingReadings);
+                    highlightVocabInElement(mesText);
+
+                    // Mark and persist
+                    var mesId = mesEl.getAttribute('mesid');
+                    mesEl.dataset.stvFurigana = 'done';
+                    mesEl.dataset.stvFuriganaReadings = JSON.stringify(existingReadings);
+                    saveFuriganaForMessage(mesId, existingReadings, cleanTextForHash);
+
+                    hideFuriganaProgressSnackbar();
+                    toastr.success(word + ' → ' + result.reading);
+                } catch (err) {
+                    hideFuriganaProgressSnackbar();
+                    console.error('[ST-Vocabulary] Drag furigana error:', err);
+                    toastr.error('후리가나 생성 실패: ' + err.message);
                 }
-
-                // Collect existing readings and add new one
-                var existingReadings = [];
-                try { existingReadings = JSON.parse(mesEl.dataset.stvFuriganaReadings || '[]'); } catch(_) {}
-                // Remove any prior entry for this word (so new reading overrides)
-                existingReadings = existingReadings.filter(function(r) { return r.word !== word; });
-                existingReadings.push({ word: word, reading: result.reading });
-
-                // Restore original HTML and re-apply all readings together
-                // This ensures the selected word (possibly inside <ruby> from prior generation) is found
-                if (mesText.dataset.stvOriginalHtml) {
-                    mesText.innerHTML = mesText.dataset.stvOriginalHtml;
-                }
-                // Capture clean text BEFORE applying furigana (for accurate textHash on save)
-                var cleanTextForHash = mesText.textContent;
-                mesText.dataset.stvOriginalHtml = mesText.innerHTML;
-                applyFuriganaToElement(mesText, existingReadings);
-                highlightVocabInElement(mesText);
-
-                // Mark and persist
-                var mesId = mesEl.getAttribute('mesid');
-                mesEl.dataset.stvFurigana = 'done';
-                mesEl.dataset.stvFuriganaReadings = JSON.stringify(existingReadings);
-                saveFuriganaForMessage(mesId, existingReadings, cleanTextForHash);
-
-                hideFuriganaProgressSnackbar();
-                toastr.success(word + ' → ' + result.reading);
-            } catch (err) {
-                hideFuriganaProgressSnackbar();
-                console.error('[ST-Vocabulary] Drag furigana error:', err);
-                toastr.error('후리가나 생성 실패: ' + err.message);
-            }
-        });
+            });
         }, e.type === 'touchend' ? 300 : 0);
     }
 
     document.addEventListener('mouseup', showTooltipForSelection);
     document.addEventListener('touchend', showTooltipForSelection);
 
-    document.addEventListener('mousedown', function(e) {
+    document.addEventListener('mousedown', function (e) {
         if (selectionTooltip && !selectionTooltip.contains(e.target)) removeTooltip();
     });
-    document.addEventListener('touchstart', function(e) {
+    document.addEventListener('touchstart', function (e) {
         if (selectionTooltip && !selectionTooltip.contains(e.target)) removeTooltip();
     });
     var chatScroll = document.getElementById('chat');
-    if (chatScroll) chatScroll.addEventListener('scroll', function() { removeTooltip(); });
+    if (chatScroll) chatScroll.addEventListener('scroll', function () { removeTooltip(); });
 }
 
 // ── Per-message furigana button (.extraMesButtons) ────
@@ -2868,7 +3439,7 @@ function setupTextSelection() {
  * Close any open furigana popup menus
  */
 function closeFuriganaPopupMenus() {
-    document.querySelectorAll('.stv-furigana-popup').forEach(function(p) { p.remove(); });
+    document.querySelectorAll('.stv-furigana-popup').forEach(function (p) { p.remove(); });
 }
 
 /**
@@ -2878,11 +3449,11 @@ function showFuriganaPopupMenu(btnEl, items) {
     closeFuriganaPopupMenus();
     var popup = document.createElement('div');
     popup.className = 'stv-furigana-popup';
-    items.forEach(function(item) {
+    items.forEach(function (item) {
         var menuBtn = document.createElement('button');
         menuBtn.className = 'stv-furigana-popup-item';
         menuBtn.innerHTML = '<span class="' + item.icon + '"></span> ' + item.label;
-        menuBtn.addEventListener('click', function(e) {
+        menuBtn.addEventListener('click', function (e) {
             e.stopPropagation();
             closeFuriganaPopupMenus();
             item.action();
@@ -2897,15 +3468,15 @@ function showFuriganaPopupMenu(btnEl, items) {
     popup.style.left = (rect.left + window.scrollX + rect.width / 2) + 'px';
 
     // Clamp to viewport edges
-    requestAnimationFrame(function() {
+    requestAnimationFrame(function () {
         var pr = popup.getBoundingClientRect();
         if (pr.left < 4) popup.style.left = (4 + pr.width / 2) + 'px';
         if (pr.right > window.innerWidth - 4) popup.style.left = (window.innerWidth - 4 - pr.width / 2 + window.scrollX) + 'px';
     });
 
     // Close on outside click (delayed to avoid immediate close)
-    setTimeout(function() {
-        var closeHandler = function(ev) {
+    setTimeout(function () {
+        var closeHandler = function (ev) {
             if (!popup.contains(ev.target)) {
                 closeFuriganaPopupMenus();
                 document.removeEventListener('mousedown', closeHandler, true);
@@ -2980,7 +3551,7 @@ function showFuriganaOnMessage(mesId) {
     var messageEl = document.querySelector('#chat .mes[mesid="' + mesId + '"]');
     if (!messageEl) return;
     var readings;
-    try { readings = JSON.parse(messageEl.dataset.stvFuriganaReadings || 'null'); } catch (_) {}
+    try { readings = JSON.parse(messageEl.dataset.stvFuriganaReadings || 'null'); } catch (_) { }
     if (!readings || !Array.isArray(readings) || readings.length === 0) {
         // Try from chatMetadata
         var chatData = getFuriganaStore();
@@ -3024,7 +3595,7 @@ function createFuriganaButton(mesBlock) {
         .addClass('mes_button stv-furigana-btn fa-solid fa-language interactable')
         .attr({ title: '후리가나', tabindex: '0' });
 
-    btn.on('click', function(e) {
+    btn.on('click', function (e) {
         e.stopPropagation();
         var messageEl = document.querySelector('#chat .mes[mesid="' + mesId + '"]');
         var hasFurigana = messageEl && (messageEl.dataset.stvFurigana === 'done');
@@ -3033,15 +3604,15 @@ function createFuriganaButton(mesBlock) {
         if (hasFurigana) {
             // Furigana is visible → show menu: 재생성, 끄기, 삭제
             showFuriganaPopupMenu(btn[0], [
-                { icon: 'fa-solid fa-rotate', label: '재생성', action: async function() { await regenerateMsgFurigana(mesId); } },
-                { icon: 'fa-solid fa-eye-slash', label: '끄기', action: function() { hideFuriganaOnMessage(mesId); toastr.info('후리가나 숨김'); } },
-                { icon: 'fa-solid fa-trash', label: '삭제', action: function() { if (messageEl) removeFuriganaFromMessage(messageEl); toastr.info('후리가나 삭제됨'); } },
+                { icon: 'fa-solid fa-rotate', label: '재생성', action: async function () { await regenerateMsgFurigana(mesId); } },
+                { icon: 'fa-solid fa-eye-slash', label: '끄기', action: function () { hideFuriganaOnMessage(mesId); toastr.info('후리가나 숨김'); } },
+                { icon: 'fa-solid fa-trash', label: '삭제', action: function () { if (messageEl) removeFuriganaFromMessage(messageEl); toastr.info('후리가나 삭제됨'); } },
             ]);
         } else if (isOff) {
             // Furigana was hidden → show menu: 켜기, 재생성
             showFuriganaPopupMenu(btn[0], [
-                { icon: 'fa-solid fa-eye', label: '켜기', action: function() { showFuriganaOnMessage(mesId); } },
-                { icon: 'fa-solid fa-rotate', label: '재생성', action: async function() { await regenerateMsgFurigana(mesId); } },
+                { icon: 'fa-solid fa-eye', label: '켜기', action: function () { showFuriganaOnMessage(mesId); } },
+                { icon: 'fa-solid fa-rotate', label: '재생성', action: async function () { await regenerateMsgFurigana(mesId); } },
             ]);
         } else if (messageEl && messageEl.dataset.stvFuriganaProcessing === 'true') {
             // Currently generating → cancel
@@ -3060,52 +3631,17 @@ function createFuriganaButton(mesBlock) {
     if (extraMesButtons.length) extraMesButtons.prepend(btn);
 }
 
-function createFuriganaRemoveButton(mesBlock) {
-    if (mesBlock.find('.stv-furigana-remove-btn').length > 0) return;
-    var mesId = mesBlock.attr('mesid');
-    // Only show on messages that have furigana applied
-    var furiganaState = mesBlock[0] && mesBlock[0].dataset.stvFurigana;
-    if (furiganaState !== 'done' && furiganaState !== 'off') return;
 
-    var btn = $('<div>')
-        .addClass('mes_button stv-furigana-remove-btn fa-solid fa-eraser interactable')
-        .attr({ title: '후리가나 관리', tabindex: '0' });
-
-    btn.on('click', function(e) {
-        e.stopPropagation();
-        var messageEl = document.querySelector('#chat .mes[mesid="' + mesId + '"]');
-        var isOff = messageEl && (messageEl.dataset.stvFurigana === 'off');
-
-        if (isOff) {
-            // Furigana is hidden → show menu: 켜기, 재생성
-            showFuriganaPopupMenu(btn[0], [
-                { icon: 'fa-solid fa-eye', label: '켜기', action: function() { showFuriganaOnMessage(mesId); } },
-                { icon: 'fa-solid fa-rotate', label: '재생성', action: async function() { await regenerateMsgFurigana(mesId); } },
-            ]);
-        } else {
-            // Furigana is visible → show menu: 재생성, 끄기, 삭제
-            showFuriganaPopupMenu(btn[0], [
-                { icon: 'fa-solid fa-rotate', label: '재생성', action: async function() { await regenerateMsgFurigana(mesId); } },
-                { icon: 'fa-solid fa-eye-slash', label: '끄기', action: function() { hideFuriganaOnMessage(mesId); toastr.info('후리가나 숨김'); } },
-                { icon: 'fa-solid fa-trash', label: '삭제', action: function() { if (messageEl) removeFuriganaFromMessage(messageEl); btn.remove(); toastr.info('후리가나 삭제됨'); } },
-            ]);
-        }
-    });
-
-    var extraMesButtons = mesBlock.find('.extraMesButtons');
-    if (extraMesButtons.length) extraMesButtons.prepend(btn);
-}
 
 function addFuriganaButtonsToAll() {
     var settings = getSettings();
     if (!settings.enabled || !settings.furiganaEnabled) return;
-    $('#chat .mes').each(function() {
+    $('#chat .mes').each(function () {
         var $this = $(this);
         var isUser = $this.attr('is_user') === 'true';
         if (isUser && !settings.showOnUserMsg) return;
         if (!isUser && !settings.showOnBotMsg) return;
         createFuriganaButton($this);
-        createFuriganaRemoveButton($this);
     });
 }
 
@@ -3132,10 +3668,10 @@ function wordFormsHasIssues(w) {
  */
 function cleanWordFormsData(wordForms) {
     if (!wordForms || typeof wordForms !== 'object') return wordForms;
-    Object.keys(wordForms).forEach(function(groupKey) {
+    Object.keys(wordForms).forEach(function (groupKey) {
         var forms = wordForms[groupKey];
         if (!Array.isArray(forms)) return;
-        forms.forEach(function(form) {
+        forms.forEach(function (form) {
             if (form.word && typeof form.word === 'string') {
                 form.word = form.word.replace(/\s*[\(\uff08][^\)\uff09]*[\)\uff09]\s*$/, '').trim();
             }
@@ -3163,12 +3699,13 @@ function showWordUpdateModal() {
 
     // Build word list HTML
     var listHtml = '';
-    vocabList.forEach(function(w) {
+    vocabList.forEach(function (w) {
         var langMap = { ja: '일', en: '영', ko: '한', zh: '중' };
         var langLabel = langMap[w.language] || '?';
-        var hasWordForms = w.wordForms && typeof w.wordForms === 'object' && Object.keys(w.wordForms).length > 0;
+        var hasWordForms = w.wordFormsChecked || (w.wordForms && typeof w.wordForms === 'object' && Object.keys(w.wordForms).length > 0);
         var hasIssues = wordFormsHasIssues(w);
-        var needsUpdate = !hasWordForms || hasIssues;
+        var missingNewFields = w.language === 'ja' && (!w.verbGroup && !w.jlptLevel && !w.kanjiBreakdown);
+        var needsUpdate = !hasWordForms || hasIssues || missingNewFields;
         if (!hasWordForms) missingCount++;
         if (hasIssues) issueCount++;
 
@@ -3213,59 +3750,40 @@ function showWordUpdateModal() {
         + '<div class="stv-update-list">' + listHtml + '</div>'
         + '</div>'
         + '<div class="stv-dialog-footer">'
-        + '<div class="stv-update-progress" id="stv-update-progress" style="display:none;">'
-        + '<div class="stv-update-progress-bar"><div class="stv-update-progress-fill" id="stv-update-progress-fill"></div></div>'
-        + '<span class="stv-update-progress-text" id="stv-update-progress-text">0 / 0</span>'
-        + '</div>'
-        + '<button class="stv-btn stv-btn-cancel" id="stv-update-cancel" style="display:none;">중지</button>'
+        + '<button class="stv-btn stv-btn-cancel" id="stv-update-close">닫기</button>'
         + '<button class="stv-btn stv-btn-save" id="stv-update-start">업데이트 시작</button>'
         + '</div></div>';
 
     document.body.appendChild(overlay);
 
-    var isRunning = false;
-    var shouldCancel = false;
-
-    var closeModal = function() {
-        if (isRunning) {
-            if (!confirm('업데이트가 진행 중입니다. 중지하시겠습니까?')) return;
-            shouldCancel = true;
-        }
-        overlay.remove();
-    };
+    var closeModal = function () { overlay.remove(); };
 
     overlay.querySelector('.stv-dialog-close').addEventListener('click', closeModal);
-    overlay.addEventListener('click', function(e) { if (e.target === overlay) closeModal(); });
+    document.getElementById('stv-update-close').addEventListener('click', closeModal);
+    overlay.addEventListener('click', function (e) { if (e.target === overlay) closeModal(); });
 
     // Select all / deselect all / select missing
-    document.getElementById('stv-update-select-all').addEventListener('click', function() {
-        overlay.querySelectorAll('.stv-update-check').forEach(function(cb) { cb.checked = true; });
+    document.getElementById('stv-update-select-all').addEventListener('click', function () {
+        overlay.querySelectorAll('.stv-update-check').forEach(function (cb) { cb.checked = true; });
     });
-    document.getElementById('stv-update-deselect-all').addEventListener('click', function() {
-        overlay.querySelectorAll('.stv-update-check').forEach(function(cb) { cb.checked = false; });
+    document.getElementById('stv-update-deselect-all').addEventListener('click', function () {
+        overlay.querySelectorAll('.stv-update-check').forEach(function (cb) { cb.checked = false; });
     });
-    document.getElementById('stv-update-select-missing').addEventListener('click', function() {
-        overlay.querySelectorAll('.stv-update-check').forEach(function(cb) {
+    document.getElementById('stv-update-select-missing').addEventListener('click', function () {
+        overlay.querySelectorAll('.stv-update-check').forEach(function (cb) {
             var wordId = cb.getAttribute('data-word-id');
-            var w = vocabList.find(function(v) { return v.id === wordId; });
-            var hasData = w && w.wordForms && typeof w.wordForms === 'object' && Object.keys(w.wordForms).length > 0;
+            var w = vocabList.find(function (v) { return v.id === wordId; });
+            var hasData = w && (w.wordFormsChecked || (w.wordForms && typeof w.wordForms === 'object' && Object.keys(w.wordForms).length > 0));
             var hasIssues = wordFormsHasIssues(w);
             cb.checked = !hasData || hasIssues;
         });
     });
 
-    // Cancel button
-    document.getElementById('stv-update-cancel').addEventListener('click', function() {
-        shouldCancel = true;
-        this.disabled = true;
-        this.textContent = '중지 중...';
-    });
-
     // Start update
-    document.getElementById('stv-update-start').addEventListener('click', async function() {
+    document.getElementById('stv-update-start').addEventListener('click', async function () {
         var overwrite = document.getElementById('stv-update-overwrite').checked;
         var selectedIds = [];
-        overlay.querySelectorAll('.stv-update-check:checked').forEach(function(cb) {
+        overlay.querySelectorAll('.stv-update-check:checked').forEach(function (cb) {
             selectedIds.push(cb.getAttribute('data-word-id'));
         });
 
@@ -3274,21 +3792,32 @@ function showWordUpdateModal() {
             return;
         }
 
-        isRunning = true;
-        shouldCancel = false;
-        this.style.display = 'none';
-        document.getElementById('stv-update-cancel').style.display = '';
-        document.getElementById('stv-update-progress').style.display = 'flex';
+        // Close the modal and run in snackbar
+        overlay.remove();
 
-        // Disable checkboxes and selection buttons
-        overlay.querySelectorAll('.stv-update-check').forEach(function(cb) { cb.disabled = true; });
-        document.getElementById('stv-update-select-all').disabled = true;
-        document.getElementById('stv-update-deselect-all').disabled = true;
-        document.getElementById('stv-update-select-missing').disabled = true;
-        document.getElementById('stv-update-overwrite').disabled = true;
+        // Create snackbar for non-blocking progress
+        var existingSnack = document.getElementById('stv-update-snackbar');
+        if (existingSnack) existingSnack.remove();
 
-        var progressFill = document.getElementById('stv-update-progress-fill');
-        var progressText = document.getElementById('stv-update-progress-text');
+        var snack = document.createElement('div');
+        snack.id = 'stv-update-snackbar';
+        snack.className = 'stv-update-snackbar';
+        snack.innerHTML = '<div class="stv-update-snack-top">'
+            + '<span class="stv-update-snack-label"><span class="fa-solid fa-arrows-rotate fa-spin"></span> 단어 업데이트</span>'
+            + '<span class="stv-update-snack-count" id="stv-update-snack-count">0 / ' + selectedIds.length + '</span>'
+            + '<button class="stv-btn stv-btn-icon stv-update-snack-cancel" id="stv-update-snack-cancel" title="중지"><span class="fa-solid fa-xmark"></span></button>'
+            + '</div>'
+            + '<div class="stv-update-snack-bar"><div class="stv-update-snack-fill" id="stv-update-snack-fill"></div></div>';
+        document.body.appendChild(snack);
+
+        var shouldCancel = false;
+        document.getElementById('stv-update-snack-cancel').addEventListener('click', function () {
+            shouldCancel = true;
+            this.disabled = true;
+        });
+
+        var countEl = document.getElementById('stv-update-snack-count');
+        var fillEl = document.getElementById('stv-update-snack-fill');
         var total = selectedIds.length;
         var processed = 0;
         var updated = 0;
@@ -3298,90 +3827,76 @@ function showWordUpdateModal() {
             if (shouldCancel) break;
 
             var wordId = selectedIds[i];
-            var wordEntry = vocabList.find(function(w) { return w.id === wordId; });
+            var wordEntry = vocabList.find(function (w) { return w.id === wordId; });
             if (!wordEntry) { processed++; continue; }
 
-            // Highlight current item
-            var currentItem = overlay.querySelector('.stv-update-check[data-word-id="' + wordId + '"]');
-            if (currentItem) currentItem.closest('.stv-update-item').classList.add('stv-update-processing');
-
-            progressText.textContent = (processed + 1) + ' / ' + total;
-            progressFill.style.width = ((processed + 1) / total * 100) + '%';
+            countEl.textContent = (processed + 1) + ' / ' + total;
+            fillEl.style.width = ((processed + 1) / total * 100) + '%';
 
             try {
                 var result = await analyzeWordWithLLM(wordEntry.word, wordEntry.language);
                 if (result) {
                     if (overwrite) {
-                        // Overwrite mode: replace all fields with new data
                         if (result.wordForms) wordEntry.wordForms = result.wordForms;
+                        wordEntry.wordFormsChecked = true;
                         if (result.baseForm !== undefined) wordEntry.baseForm = result.baseForm;
                         if (result.reading) wordEntry.reading = result.reading;
                         if (result.meaning) wordEntry.meaning = result.meaning;
                         if (result.partOfSpeech) wordEntry.partOfSpeech = result.partOfSpeech;
                         if (result.grammarInfo !== undefined) wordEntry.grammarInfo = result.grammarInfo;
                         if (result.examples && result.examples.length > 0) wordEntry.examples = result.examples;
+                        if (result.verbGroup !== undefined) wordEntry.verbGroup = result.verbGroup || null;
+                        if (result.jlptLevel !== undefined) wordEntry.jlptLevel = result.jlptLevel || null;
+                        if (result.kanjiBreakdown !== undefined) wordEntry.kanjiBreakdown = result.kanjiBreakdown || null;
                     } else {
-                        // Fill-in mode: fill missing fields OR replace wordForms with quality issues
-                        var wfMissing = !wordEntry.wordForms || (typeof wordEntry.wordForms === 'object' && Object.keys(wordEntry.wordForms).length === 0);
+                        var wfMissing = !wordEntry.wordFormsChecked && (!wordEntry.wordForms || (typeof wordEntry.wordForms === 'object' && Object.keys(wordEntry.wordForms).length === 0));
                         var wfBad = wordFormsHasIssues(wordEntry);
                         if (wfMissing || wfBad) {
                             wordEntry.wordForms = result.wordForms || {};
                         }
-                        if (!wordEntry.baseForm && result.baseForm) {
-                            wordEntry.baseForm = result.baseForm;
-                        }
-                        if (!wordEntry.reading && result.reading) {
-                            wordEntry.reading = result.reading;
-                        }
-                        if (!wordEntry.meaning && result.meaning) {
-                            wordEntry.meaning = result.meaning;
-                        }
-                        if (!wordEntry.partOfSpeech && result.partOfSpeech) {
-                            wordEntry.partOfSpeech = result.partOfSpeech;
-                        }
-                        if (!wordEntry.grammarInfo && result.grammarInfo) {
-                            wordEntry.grammarInfo = result.grammarInfo;
-                        }
-                        if ((!wordEntry.examples || wordEntry.examples.length === 0) && result.examples) {
-                            wordEntry.examples = result.examples;
-                        }
+                        wordEntry.wordFormsChecked = true;
+                        if (!wordEntry.baseForm && result.baseForm) wordEntry.baseForm = result.baseForm;
+                        if (!wordEntry.reading && result.reading) wordEntry.reading = result.reading;
+                        if (!wordEntry.meaning && result.meaning) wordEntry.meaning = result.meaning;
+                        if (!wordEntry.partOfSpeech && result.partOfSpeech) wordEntry.partOfSpeech = result.partOfSpeech;
+                        if (!wordEntry.grammarInfo && result.grammarInfo) wordEntry.grammarInfo = result.grammarInfo;
+                        if ((!wordEntry.examples || wordEntry.examples.length === 0) && result.examples) wordEntry.examples = result.examples;
+                        if (!wordEntry.verbGroup && result.verbGroup) wordEntry.verbGroup = result.verbGroup;
+                        if (!wordEntry.jlptLevel && result.jlptLevel) wordEntry.jlptLevel = result.jlptLevel;
+                        if (!wordEntry.kanjiBreakdown && result.kanjiBreakdown) wordEntry.kanjiBreakdown = result.kanjiBreakdown;
                     }
                     updated++;
-                    if (currentItem) currentItem.closest('.stv-update-item').classList.add('stv-update-done');
                 } else {
                     failed++;
-                    if (currentItem) currentItem.closest('.stv-update-item').classList.add('stv-update-failed');
                 }
             } catch (e) {
                 console.error('[' + MODULE_NAME + '] word update error:', e);
                 failed++;
-                if (currentItem) currentItem.closest('.stv-update-item').classList.add('stv-update-failed');
             }
 
-            if (currentItem) currentItem.closest('.stv-update-item').classList.remove('stv-update-processing');
             processed++;
-
-            // Save periodically (every 5 words)
-            if (processed % 5 === 0) {
-                saveSettings();
-            }
+            if (processed % 5 === 0) saveSettings();
         }
 
         // Final save
         saveSettings();
-        isRunning = false;
 
-        progressFill.style.width = '100%';
-        document.getElementById('stv-update-cancel').style.display = 'none';
-
-        var summaryMsg = '완료: ' + updated + '개 업데이트';
+        // Update snackbar to show completion
+        var summaryMsg = updated + '개 업데이트';
         if (failed > 0) summaryMsg += ', ' + failed + '개 실패';
         if (shouldCancel) summaryMsg += ' (중지됨)';
-        progressText.textContent = summaryMsg;
 
-        // Rebuild word forms map for highlighting
+        snack.innerHTML = '<div class="stv-update-snack-top">'
+            + '<span class="stv-update-snack-label"><span class="fa-solid fa-check"></span> ' + summaryMsg + '</span>'
+            + '<button class="stv-btn stv-btn-icon stv-update-snack-cancel" title="닫기"><span class="fa-solid fa-xmark"></span></button>'
+            + '</div>';
+        snack.querySelector('.stv-update-snack-cancel').addEventListener('click', function () { snack.remove(); });
+
+        // Auto-dismiss after 5 seconds
+        setTimeout(function () { if (snack.parentNode) snack.remove(); }, 5000);
+
         if (typeof buildWordFormsMap === 'function') buildWordFormsMap();
-
+        renderVocabList();
         toastr.success(summaryMsg, '단어 데이터 업데이트');
     });
 }
@@ -3586,7 +4101,7 @@ function showSettingsModal() {
     var currentProviderModels = PROVIDER_MODELS[s.provider] || [];
     var isCustomModel = currentProviderModels.indexOf(s.model) === -1 && s.model !== '';
     var modelSelectHtml = '<option value="">모델 선택...</option>';
-    currentProviderModels.forEach(function(m) {
+    currentProviderModels.forEach(function (m) {
         modelSelectHtml += '<option value="' + m + '"' + (s.model === m ? ' selected' : '') + '>' + m + '</option>';
     });
     modelSelectHtml += '<option value="__custom__"' + (isCustomModel ? ' selected' : '') + '>직접 입력</option>';
@@ -3672,20 +4187,20 @@ function showSettingsModal() {
 
         // ── Section 5: 단어장 ──
         + '<div class="stv-settings-section"><h4>단어장</h4>'
-        + (function() {
+        + (function () {
             var total = s.vocabList.length;
             var langMap = { ja: '일본어', en: '영어', ko: '한국어', zh: '중국어' };
             var counts = {};
-            s.vocabList.forEach(function(w) {
+            s.vocabList.forEach(function (w) {
                 var l = w.language || 'unknown';
                 counts[l] = (counts[l] || 0) + 1;
             });
             var html = '<div class="stv-stats-block">';
             html += '<div class="stv-stats-total">저장된 단어 <b>' + total + '</b>개</div>';
             if (total > 0) {
-                var langKeys = Object.keys(counts).sort(function(a, b) { return counts[b] - counts[a]; });
+                var langKeys = Object.keys(counts).sort(function (a, b) { return counts[b] - counts[a]; });
                 html += '<div class="stv-stats-langs">';
-                langKeys.forEach(function(l) {
+                langKeys.forEach(function (l) {
                     var label = langMap[l] || (l === 'unknown' ? '미분류' : l);
                     html += '<span class="stv-stats-lang-badge">' + label + ' <b>' + counts[l] + '</b></span>';
                 });
@@ -3705,19 +4220,19 @@ function showSettingsModal() {
         + '<div class="stv-dialog-footer"><button class="stv-btn stv-btn-save" id="stv-set-save">저장</button></div></div>';
     document.body.appendChild(overlay);
 
-    var closeModal = function() { overlay.remove(); };
+    var closeModal = function () { overlay.remove(); };
     overlay.querySelector('.stv-dialog-close').addEventListener('click', closeModal);
-    overlay.addEventListener('click', function(e) { if (e.target === overlay) closeModal(); });
+    overlay.addEventListener('click', function (e) { if (e.target === overlay) closeModal(); });
 
     // Provider change → update model dropdown
-    document.getElementById('stv-set-provider').addEventListener('change', function() {
+    document.getElementById('stv-set-provider').addEventListener('change', function () {
         var provider = this.value;
         var models = PROVIDER_MODELS[provider] || [];
         var modelSelect = document.getElementById('stv-set-model-select');
         var customInput = document.getElementById('stv-set-model-custom');
         var defModel = DEFAULT_MODELS[provider] || '';
         var html = '<option value="">모델 선택...</option>';
-        models.forEach(function(m) {
+        models.forEach(function (m) {
             html += '<option value="' + m + '"' + (m === defModel ? ' selected' : '') + '>' + m + '</option>';
         });
         html += '<option value="__custom__">직접 입력</option>';
@@ -3727,7 +4242,7 @@ function showSettingsModal() {
     });
 
     // Model select → show/hide custom input
-    document.getElementById('stv-set-model-select').addEventListener('change', function() {
+    document.getElementById('stv-set-model-select').addEventListener('change', function () {
         var customInput = document.getElementById('stv-set-model-custom');
         if (this.value === '__custom__') {
             customInput.style.display = '';
@@ -3739,41 +4254,41 @@ function showSettingsModal() {
     });
 
     // Remove all furigana
-    document.getElementById('stv-set-remove-all').addEventListener('click', function() {
+    document.getElementById('stv-set-remove-all').addEventListener('click', function () {
         removeAllFurigana();
         toastr.info('후리가나가 삭제되었습니다.');
     });
 
     // Word data update button
-    document.getElementById('stv-set-word-update').addEventListener('click', function() {
+    document.getElementById('stv-set-word-update').addEventListener('click', function () {
         showWordUpdateModal();
     });
 
     // Furigana size live preview
-    document.getElementById('stv-set-furigana-size').addEventListener('input', function() {
+    document.getElementById('stv-set-furigana-size').addEventListener('input', function () {
         var val = parseFloat(this.value);
         document.getElementById('stv-furigana-size-label').textContent = val + 'em';
         document.documentElement.style.setProperty('--stv-furigana-size', val + 'em');
     });
 
     // Furigana color + opacity live preview
-    document.getElementById('stv-set-furigana-color').addEventListener('input', function() {
+    document.getElementById('stv-set-furigana-color').addEventListener('input', function () {
         document.documentElement.style.setProperty('--stv-furigana-color', this.value);
     });
-    document.getElementById('stv-set-furigana-opacity').addEventListener('input', function() {
+    document.getElementById('stv-set-furigana-opacity').addEventListener('input', function () {
         var val = parseFloat(this.value);
         document.getElementById('stv-furigana-opacity-label').textContent = Math.round(val * 100) + '%';
         document.documentElement.style.setProperty('--stv-furigana-opacity', val);
     });
 
     // Vocab color live preview
-    document.getElementById('stv-set-vocab-color').addEventListener('input', function() {
+    document.getElementById('stv-set-vocab-color').addEventListener('input', function () {
         var orig = getSettings().vocabHighlightColor;
         getSettings().vocabHighlightColor = this.value;
         applyVocabColors();
         getSettings().vocabHighlightColor = orig;
     });
-    document.getElementById('stv-set-vocab-hover-color').addEventListener('input', function() {
+    document.getElementById('stv-set-vocab-hover-color').addEventListener('input', function () {
         var orig = getSettings().vocabHoverColor;
         getSettings().vocabHoverColor = this.value;
         applyVocabColors();
@@ -3781,7 +4296,7 @@ function showSettingsModal() {
     });
 
     // Save
-    document.getElementById('stv-set-save').addEventListener('click', function() {
+    document.getElementById('stv-set-save').addEventListener('click', function () {
         var settings = getSettings();
         settings.enabled = document.getElementById('stv-set-enabled').checked;
         settings.theme = document.getElementById('stv-set-theme').value;
@@ -3825,7 +4340,7 @@ function addWandMenuButtons() {
         vocabBtn.id = 'stv-wand-vocab';
         vocabBtn.className = 'list-group-item flex-container flexGap5';
         vocabBtn.innerHTML = '<div class="fa-solid fa-book-bookmark extensionsMenuExtensionButton"></div><span>단어장</span>';
-        vocabBtn.addEventListener('click', function() {
+        vocabBtn.addEventListener('click', function () {
             toggleVocabPanel();
             $('#extensionsMenu').hide();
         });
@@ -3837,7 +4352,7 @@ function addWandMenuButtons() {
         settingsBtn.id = 'stv-wand-settings';
         settingsBtn.className = 'list-group-item flex-container flexGap5';
         settingsBtn.innerHTML = '<div class="fa-solid fa-gear extensionsMenuExtensionButton"></div><span>ST Vocabulary 설정</span>';
-        settingsBtn.addEventListener('click', function() {
+        settingsBtn.addEventListener('click', function () {
             showSettingsModal();
             $('#extensionsMenu').hide();
         });
@@ -3909,11 +4424,11 @@ function onMessageRendered(mesId) {
     var autoMode = settings.autoFurigana || 'off';
     if (autoMode !== 'off' && mesEl.dataset.stvFurigana !== 'done' && mesEl.dataset.stvFurigana !== 'off') {
         var shouldAuto = (autoMode === 'both') ||
-                         (autoMode === 'ai' && !isUser) ||
-                         (autoMode === 'user' && isUser);
+            (autoMode === 'ai' && !isUser) ||
+            (autoMode === 'user' && isUser);
         if (shouldAuto) {
             if (!mesEl.querySelector('.stv-furigana-btn')) createFuriganaButton(mesBlock);
-            (async function() {
+            (async function () {
                 try {
                     var mesText = mesEl.querySelector('.mes_text');
                     if (!mesText) return;
@@ -3969,7 +4484,7 @@ function onMessageRendered(mesId) {
  */
 function refreshVocabHighlightsInChat() {
     // Remove existing vocab-hl-span elements (unwrap back to text)
-    document.querySelectorAll('#chat .mes .mes_text .stv-vocab-hl-span').forEach(function(span) {
+    document.querySelectorAll('#chat .mes .mes_text .stv-vocab-hl-span').forEach(function (span) {
         var parent = span.parentNode;
         while (span.firstChild) parent.insertBefore(span.firstChild, span);
         parent.removeChild(span);
@@ -3977,7 +4492,7 @@ function refreshVocabHighlightsInChat() {
     });
     // Clean up orphaned furigana wrappers that only contain text (no ruby elements)
     // to prevent nesting on repeated refresh cycles
-    document.querySelectorAll('#chat .mes .mes_text .stv-furigana-wrapper').forEach(function(wrapper) {
+    document.querySelectorAll('#chat .mes .mes_text .stv-furigana-wrapper').forEach(function (wrapper) {
         if (!wrapper.querySelector('.stv-ruby') && !wrapper.querySelector('.stv-vocab-hl-span')) {
             var parent = wrapper.parentNode;
             while (wrapper.firstChild) parent.insertBefore(wrapper.firstChild, wrapper);
@@ -3986,7 +4501,7 @@ function refreshVocabHighlightsInChat() {
         }
     });
     // Also remove stv-vocab-highlight and stv-vocab-form from ruby elements (re-evaluate below)
-    document.querySelectorAll('#chat .mes .mes_text .stv-ruby.stv-vocab-highlight').forEach(function(ruby) {
+    document.querySelectorAll('#chat .mes .mes_text .stv-ruby.stv-vocab-highlight').forEach(function (ruby) {
         ruby.classList.remove('stv-vocab-highlight');
         ruby.classList.remove('stv-vocab-form');
         ruby.removeAttribute('data-stv-base-id');
@@ -3996,9 +4511,9 @@ function refreshVocabHighlightsInChat() {
     // Re-apply to ruby elements too
     var settings = getSettings();
     if (settings.highlightVocab && settings.vocabList) {
-        var vocabWords = new Set(settings.vocabList.map(function(w) { return w.word; }));
+        var vocabWords = new Set(settings.vocabList.map(function (w) { return w.word; }));
         var formsMapRefresh = settings.highlightWordForms ? buildWordFormsMap() : null;
-        document.querySelectorAll('#chat .mes .mes_text .stv-ruby[data-stv-word]').forEach(function(ruby) {
+        document.querySelectorAll('#chat .mes .mes_text .stv-ruby[data-stv-word]').forEach(function (ruby) {
             var rubyWord = ruby.getAttribute('data-stv-word');
             if (vocabWords.has(rubyWord)) {
                 ruby.classList.add('stv-vocab-highlight');
@@ -4019,7 +4534,7 @@ function highlightAllVocabInChat() {
     var settings = getSettings();
     if (!settings.highlightVocab || !settings.vocabList || settings.vocabList.length === 0) return;
 
-    document.querySelectorAll('#chat .mes .mes_text').forEach(function(mesText) {
+    document.querySelectorAll('#chat .mes .mes_text').forEach(function (mesText) {
         // Skip if already has vocab highlights (avoid double processing)
         if (mesText.querySelector('.stv-vocab-hl-span')) return;
         highlightVocabInElement(mesText);
@@ -4029,7 +4544,7 @@ function highlightAllVocabInChat() {
 function onChatChanged() {
     migrateOldFuriganaData();
     updateFuriganaVisibility();
-    setTimeout(function() {
+    setTimeout(function () {
         addFuriganaButtonsToAll();
         reapplyAllStoredFurigana();
         highlightAllVocabInChat();
@@ -4065,7 +4580,7 @@ function migrateOldFuriganaData() {
         // Copy old data into chatMetadata
         var store = ensureFuriganaStore();
         if (!store) return;
-        Object.keys(oldData).forEach(function(mesId) {
+        Object.keys(oldData).forEach(function (mesId) {
             var entry = oldData[mesId];
             // Normalize old format (direct array) to new format
             if (Array.isArray(entry)) {
@@ -4110,7 +4625,7 @@ function onMessageDeleted(newLength) {
     if (!store) return;
     // Remove furigana entries for mesIds >= newLength
     var changed = false;
-    Object.keys(store).forEach(function(mesId) {
+    Object.keys(store).forEach(function (mesId) {
         if (parseInt(mesId, 10) >= newLength) {
             delete store[mesId];
             changed = true;
@@ -4133,7 +4648,7 @@ function setupFuriganaMutationObserver() {
     var chat = document.getElementById('chat');
     if (!chat) return;
 
-    furiganaObserver = new MutationObserver(function(mutations) {
+    furiganaObserver = new MutationObserver(function (mutations) {
         for (var i = 0; i < mutations.length; i++) {
             var mutation = mutations[i];
             if (mutation.type !== 'childList' || mutation.addedNodes.length === 0) continue;
@@ -4211,7 +4726,7 @@ function setupFuriganaMutationObserver() {
 //  INITIALIZATION
 // ══════════════════════════════════════════════════════
 
-jQuery(async function() {
+jQuery(async function () {
     var settings = getSettings();
     console.log('[' + MODULE_NAME + '] Initializing... (' + settings.vocabList.length + ' words in vocabulary)');
 
@@ -4233,7 +4748,7 @@ jQuery(async function() {
     eventSource.on(event_types.MESSAGE_SWIPED, onMessageEdited);
     eventSource.on(event_types.MESSAGE_DELETED, onMessageDeleted);
 
-    setTimeout(function() { addFuriganaButtonsToAll(); }, 500);
+    setTimeout(function () { addFuriganaButtonsToAll(); }, 500);
 
     console.log('[' + MODULE_NAME + '] Initialized successfully.');
 });
