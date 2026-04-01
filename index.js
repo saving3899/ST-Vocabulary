@@ -3634,6 +3634,9 @@ function setupTextSelection() {
         if (selectionTooltip && selectionTooltip.contains(e.target)) return;
         // If furigana edit popup is active, don't show selection tooltip
         if (_furiganaEditActive) return;
+        // Don't show tooltip when selecting inside editable elements (textarea, input, contenteditable)
+        var target = e.target;
+        if (target && (target.tagName === 'TEXTAREA' || target.tagName === 'INPUT' || target.isContentEditable)) { removeTooltip(); return; }
         var chatEl = document.getElementById('chat');
         if (!chatEl || !chatEl.contains(e.target)) { removeTooltip(); return; }
 
