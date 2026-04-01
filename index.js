@@ -12,6 +12,7 @@ import {
 
 import { extension_settings, getContext, saveMetadataDebounced } from '../../../extensions.js';
 import { SECRET_KEYS, secret_state } from '../../../secrets.js';
+import { oai_settings } from '../../../openai.js';
 
 const MODULE_NAME = 'ST-Vocabulary';
 
@@ -283,7 +284,9 @@ async function callLLM(prompt, signal) {
     const info = PROVIDERS[provider];
     if (!info) throw new Error('지원되지 않는 프로바이더: ' + provider);
 
-    const apiKey = secret_state[SECRET_KEYS[info.secretKey]];
+    const apiKey = provider === 'vertexai'
+        ? (secret_state[SECRET_KEYS.VERTEXAI] || secret_state[SECRET_KEYS.VERTEXAI_SERVICE_ACCOUNT])
+        : secret_state[SECRET_KEYS[info.secretKey]];
     if (!apiKey) throw new Error(info.label + ' API 키가 설정되어 있지 않습니다. SillyTavern API 연결 설정을 확인하세요.');
 
     const model = settings.model || DEFAULT_MODELS[provider] || '';
@@ -296,6 +299,15 @@ async function callLLM(prompt, signal) {
         stream: false,
         chat_completion_source: info.source,
     };
+
+    // Vertex AI 전용 파라미터 추가
+    if (provider === 'vertexai') {
+        parameters.vertexai_auth_mode = oai_settings.vertexai_auth_mode || 'express';
+        parameters.vertexai_region = oai_settings.vertexai_region || 'global';
+        if (parameters.vertexai_auth_mode === 'express' && oai_settings.vertexai_express_project_id) {
+            parameters.vertexai_express_project_id = oai_settings.vertexai_express_project_id;
+        }
+    }
 
     var fetchOptions = {
         method: 'POST',
@@ -1091,6 +1103,247 @@ function buildWordFormsMap() {
     return formsMap;
 }
 
+// ── Built-in English Grammar Explanations ─────────────
+const ENGLISH_GRAMMAR_EXPLANATIONS = {
+    'past tense': {
+        name: '과거형',
+        description: '과거에 일어난 동작이나 상태를 나타내는 형태.\n규칙 동사는 -ed를 붙이고, 불규칙 동사는 별도의 형태를 가진다.',
+        formation: '• 규칙 동사: 어미에 -ed\n  walk → walked, play → played\n  -e로 끝남: -d만 추가 (like → liked)\n  자음+y: y → ied (study → studied)\n  짧은 모음+자음 하나: 자음을 한 번 더 씀 (stop → stopped)\n  ※ 2음절 이상은 강세가 끝에 올 때만 겹침\n    prefer → preferred (강세 뒤 ○)\n    visit → visited (강세 앞 ✗)\n• 불규칙 동사: 개별 암기\n  go → went, see → saw, run → ran',
+        usage: '• I walked to school yesterday. (어제 학교에 걸어갔다.)\n• She went home early. (그녀는 일찍 집에 갔다.)\n• They played soccer last week. (그들은 지난주에 축구했다.)',
+    },
+    'past participle': {
+        name: '과거 분사',
+        description: '완료 시제, 수동태, 형용사적 용법에 사용되는 동사 형태.\n규칙 동사는 과거형과 동일(-ed), 불규칙 동사는 별도 형태.',
+        formation: '• 규칙 동사: 과거형과 동일\n  walked, played, studied\n• 불규칙 동사: 개별 암기 (3단 변화의 세 번째)\n  go → gone, see → seen, write → written\n  eat → eaten, break → broken, take → taken',
+        usage: '• 완료: I have eaten lunch. (점심을 먹었다.)\n• 수동: The book was written by her. (그 책은 그녀에 의해 쓰였다.)\n• 형용사: a broken window (깨진 창문)',
+    },
+    '-ing form': {
+        name: '-ing 현재 분사 / 동명사',
+        description: '진행형, 동명사(명사 역할), 현재 분사(형용사 역할)로 사용되는 형태.',
+        formation: '• 기본: 동사 + -ing\n  walk → walking, eat → eating\n• -e로 끝남: e를 빼고 -ing (make → making)\n• 짧은 모음+자음 하나: 자음을 한 번 더 씀 (run → running, sit → sitting)\n  ※ 2음절 이상은 강세가 끝에 올 때만 겹침\n    prefer → preferring (강세 뒤 ○)\n    visit → visiting (강세 앞 ✗)\n• -ie로 끝남: ie → y + ing (die → dying, lie → lying)',
+        usage: '• 진행형: She is reading a book. (그녀는 책을 읽고 있다.)\n• 동명사: Swimming is fun. (수영은 재미있다.)\n• 형용사: an interesting movie (흥미로운 영화)',
+    },
+    'comparative': {
+        name: '비교급',
+        description: '두 대상을 비교할 때 사용하는 형용사/부사의 형태.',
+        formation: '• 1음절: -er 추가 (tall → taller, fast → faster)\n• -e로 끝남: -r만 추가 (large → larger)\n• 자음+y: y → ier (happy → happier)\n• 2음절 이상: more + 기본형 (beautiful → more beautiful)\n• 불규칙: good → better, bad → worse, far → farther/further',
+        usage: '• She is taller than me. (그녀는 나보다 키가 크다.)\n• This book is more interesting. (이 책이 더 흥미롭다.)\n• He runs faster than his brother. (그는 형보다 빨리 달린다.)',
+    },
+    'superlative': {
+        name: '최상급',
+        description: '셋 이상의 대상 중 가장 뛰어남을 나타내는 형용사/부사의 형태.',
+        formation: '• 1음절: -est 추가 (tall → tallest)\n• -e로 끝남: -st만 추가 (large → largest)\n• 자음+y: y → iest (happy → happiest)\n• 2음절 이상: most + 기본형 (beautiful → most beautiful)\n• 불규칙: good → best, bad → worst, far → farthest/furthest',
+        usage: '• She is the tallest in her class. (그녀는 반에서 가장 키가 크다.)\n• This is the most beautiful place. (이곳이 가장 아름다운 곳이다.)',
+    },
+    'plural': {
+        name: '복수형',
+        description: '명사가 둘 이상을 나타낼 때의 형태.',
+        formation: '• 기본: -s 추가 (cat → cats, book → books)\n• -s/-x/-z/-ch/-sh: -es 추가 (bus → buses, box → boxes)\n• 자음+o: -es 추가 (potato → potatoes, hero → heroes)\n  ※ 외래어·줄임말은 -s만: piano → pianos, photo → photos\n• 자음+y: y → ies (city → cities, baby → babies)\n• -f/-fe: f → ves (knife → knives, leaf → leaves)\n• 불규칙: man → men, child → children, tooth → teeth\n  mouse → mice, person → people, foot → feet\n• 불변: sheep → sheep, fish → fish, deer → deer',
+        usage: '• I have two cats. (나는 고양이 두 마리가 있다.)\n• The children are playing. (아이들이 놀고 있다.)',
+    },
+    '3rd person': {
+        name: '3인칭 단수 현재',
+        description: '현재 시제에서 3인칭 단수 주어(he/she/it)와 함께 쓰는 동사 형태.',
+        formation: '• 기본: -s 추가 (run → runs, like → likes)\n• -s/-x/-z/-ch/-sh/-o: -es 추가 (watch → watches, go → goes, do → does)\n• 자음+y: y → ies (study → studies, fly → flies)\n• 불규칙: have → has, be → is',
+        usage: '• He runs every morning. (그는 매일 아침 달린다.)\n• She studies English. (그녀는 영어를 공부한다.)\n• It has a long tail. (그것은 긴 꼬리를 가지고 있다.)',
+    },
+    'present perfect': {
+        name: '현재 완료',
+        description: '과거에 시작되어 현재까지 영향을 미치는 동작이나 경험을 나타내는 시제.',
+        formation: '• have/has + 과거 분사\n  I have eaten. She has gone.\n• 부정: have/has + not + 과거 분사\n  I haven\'t seen it. She hasn\'t finished.',
+        usage: '• 경험: I have visited Japan twice. (일본에 두 번 가 본 적 있다.)\n• 완료: She has already finished. (그녀는 이미 끝냈다.)\n• 계속: I have lived here for 5 years. (5년간 여기 살고 있다.)',
+    },
+    'past perfect': {
+        name: '과거 완료',
+        description: '과거의 특정 시점보다 더 이전에 일어난 동작을 나타내는 시제.',
+        formation: '• had + 과거 분사\n  I had eaten before she arrived.\n• 부정: had + not + 과거 분사\n  I hadn\'t seen it before.',
+        usage: '• 대과거: I had already eaten when she arrived. (그녀가 도착했을 때 나는 이미 먹었었다.)\n• 경험: He had never seen snow before that day. (그날 이전에 그는 눈을 본 적이 없었다.)',
+    },
+    'future perfect': {
+        name: '미래 완료',
+        description: '미래의 특정 시점까지 완료될 동작을 나타내는 시제.',
+        formation: '• will have + 과거 분사\n  I will have finished by then.\n• 부정: will not have + 과거 분사\n  She won\'t have arrived yet.',
+        usage: '• By next year, I will have graduated. (내년이면 졸업해 있을 것이다.)\n• She will have left by the time you arrive. (네가 도착할 때쯤 그녀는 떠나 있을 것이다.)',
+    },
+    'present continuous': {
+        name: '현재 진행형',
+        description: '지금 이 순간 진행 중인 동작이나 일시적 상황을 나타내는 시제.',
+        formation: '• am/is/are + -ing\n  I am eating. She is running.\n• 부정: am/is/are + not + -ing\n  He isn\'t sleeping.',
+        usage: '• 진행: I am studying now. (나는 지금 공부하고 있다.)\n• 일시적: She is living in Seoul this year. (그녀는 올해 서울에 살고 있다.)\n• 가까운 미래: We are leaving tomorrow. (우리는 내일 떠난다.)',
+    },
+    'past continuous': {
+        name: '과거 진행형',
+        description: '과거의 특정 시점에 진행 중이던 동작을 나타내는 시제.',
+        formation: '• was/were + -ing\n  I was eating when he called.\n• 부정: was/were + not + -ing\n  She wasn\'t sleeping.',
+        usage: '• 과거 진행: I was reading when the phone rang. (전화가 울렸을 때 책을 읽고 있었다.)\n• 배경 묘사: The sun was shining and birds were singing. (태양이 빛나고 새들이 노래하고 있었다.)',
+    },
+    'passive voice': {
+        name: '수동태',
+        description: '동작을 받는 대상이 주어가 되는 문장 형태.\n예: "나는 책을 읽었다" → "책이 읽혔다"처럼 주어가 바뀐다.',
+        formation: '• be동사 + 과거 분사 (+ by 행위자)\n  ※ p.p. = past participle(과거 분사)의 약자\n  현재: is/am/are + 과거 분사\n  과거: was/were + 과거 분사\n  완료: has/have been + 과거 분사\n  진행: is/am/are being + 과거 분사',
+        usage: '• The book was written by her. (그 책은 그녀에 의해 쓰였다.)\n• English is spoken worldwide. (영어는 전 세계에서 사용된다.)\n• The cake has been eaten. (케이크가 먹혔다.)',
+    },
+    'subjunctive': {
+        name: '가정법',
+        description: '가정, 소망, 제안, 요구 등 사실이 아닌 상황을 나타내는 문법.\n"만약 ~라면"처럼 현실과 다른 상황을 표현한다.',
+        formation: '• 가정법 과거: If + 주어 + 과거형, 주어 + would/could + 동사원형\n  If I were you, I would go.\n• 가정법 과거완료: If + 주어 + had + 과거 분사, 주어 + would have + 과거 분사\n  If I had known, I would have helped.\n• 제안/요구: suggest/recommend + that + 주어 + 동사원형\n  I suggest that he go.',
+        usage: '• If I were rich, I would travel. (내가 부자라면 여행할 텐데.)\n• I wish I had studied harder. (더 열심히 공부했더라면.)\n• She recommended that he be promoted. (그녀는 그의 승진을 추천했다.)',
+    },
+    'gerund': {
+        name: '동명사',
+        description: '동사에 -ing를 붙여 명사 역할을 하게 하는 형태.\n주어, 목적어, 보어 자리에 올 수 있다.',
+        formation: '• 동사 + -ing (형태는 현재 분사와 동일)\n  swim → swimming, read → reading',
+        usage: '• 주어: Swimming is good exercise. (수영은 좋은 운동이다.)\n• 목적어: I enjoy reading. (나는 독서를 즐긴다.)\n• 전치사 뒤: She is good at cooking. (그녀는 요리를 잘한다.)',
+    },
+    'infinitive': {
+        name: '부정사',
+        description: 'to + 동사원형의 형태. 명사, 형용사, 부사 역할을 한다.',
+        formation: '• to + 동사 원형\n  to go, to eat, to study\n• 부정: not to + 동사 원형\n  not to go\n• 원형 부정사 (to 생략): 사역/지각 동사 뒤\n  let him go, watch her dance',
+        usage: '• 명사: To read is fun. (읽는 것은 재미있다.)\n• 형용사: I have something to eat. (먹을 것이 있다.)\n• 부사(목적): I went to the store to buy milk. (우유를 사러 가게에 갔다.)\n• 원형 부정사: She let me go. (그녀는 나를 보내줬다.)\n• 지각 동사: I watched her dance. (나는 그녀가 춤추는 것을 보았다.)',
+    },
+    'conditional': {
+        name: '조건문',
+        description: '조건과 결과를 나타내는 문장 구조. 4가지 유형이 있다.',
+        formation: '• Zero: If + 주어 + 현재동사, 주어 + 현재동사 (일반적 사실)\n• 1st: If + 주어 + 현재동사, 주어 + will + 동사원형 (가능한 미래)\n• 2nd: If + 주어 + 과거동사, 주어 + would + 동사원형 (비현실 가정)\n• 3rd: If + 주어 + had + 과거 분사, 주어 + would have + 과거 분사 (과거 비현실)',
+        usage: '• Zero: If you heat water, it boils. (물을 가열하면 끓는다.)\n• 1st: If it rains, I will stay home. (비가 오면 집에 있겠다.)\n• 2nd: If I were you, I would accept. (내가 너라면 수락하겠다.)\n• 3rd: If I had known, I would have come. (알았더라면 왔을 텐데.)',
+    },
+    'relative clause': {
+        name: '관계절',
+        description: '관계대명사(who, which, that, whose, whom)로 시작하여 명사를 수식하는 절.',
+        formation: '• 사람: who/that (주격), whom/that (목적격), whose (소유격)\n• 사물: which/that (주격/목적격), whose/of which (소유격)\n• 제한적 용법: 콤마 없음 (필수 정보)\n• 비제한적 용법: 콤마 있음 (부가 정보)',
+        usage: '• The man who called you is here. (당신에게 전화한 남자가 여기 있다.)\n• The book which I read was great. (내가 읽은 책은 훌륭했다.)\n• She has a friend whose father is a doctor. (그녀에게는 아버지가 의사인 친구가 있다.)',
+    },
+
+    // ── 조동사 ──
+    'modal verb': {
+        name: '조동사',
+        description: '본동사 앞에서 가능, 허가, 의무, 추측 등의 의미를 더하는 동사.\n조동사 뒤에는 항상 동사 원형이 온다.',
+        formation: '• can/could: 능력·허가·가능성\n• may/might: 허가·추측\n• will/would: 의지·미래·정중한 요청\n• shall/should: 제안·의무·충고\n• must: 강한 의무·확실한 추측\n• need: 필요 (부정문/의문문)\n• dare: 감히 ~하다',
+        usage: '• Can you swim? (수영할 수 있니?)\n• You should study harder. (더 열심히 공부해야 한다.)\n• She must be tired. (그녀는 틀림없이 피곤할 것이다.)\n• It might rain tomorrow. (내일 비가 올지도 모른다.)',
+    },
+    'modal perfect': {
+        name: '조동사 완료형',
+        description: '조동사와 완료형(have + 과거 분사)을 결합하여 과거에 대한 추측, 후회, 비난 등을 표현.',
+        formation: '• must have + 과거 분사: ~했음에 틀림없다 (확신 추측)\n• may/might have + 과거 분사: ~했을지도 모른다 (불확실 추측)\n• could have + 과거 분사: ~할 수도 있었다 (미실현 가능성)\n• should have + 과거 분사: ~했어야 했다 (후회/비난)\n• would have + 과거 분사: ~했을 것이다 (가정 결과)\n• needn\'t have + 과거 분사: ~할 필요 없었다 (불필요한 행동)',
+        usage: '• She must have forgotten. (그녀는 잊었음에 틀림없다.)\n• You should have told me. (나한테 말했어야 했다.)\n• He could have won. (그는 이길 수도 있었다.)\n• I needn\'t have hurried. (서두를 필요 없었다.)',
+    },
+
+    // ── 전치사 ──
+    'preposition': {
+        name: '전치사',
+        description: '명사/대명사 앞에 놓여 장소, 시간, 방향, 원인 등의 관계를 나타내는 말.',
+        formation: '• 장소: in (안에), on (위에), at (지점), by (옆에), under (아래)\n  between (사이에), behind (뒤에), in front of (앞에)\n• 시간: at (시각), on (요일/날짜), in (월/년/계절)\n  before (전에), after (후에), during (~동안), since (~이래)\n• 방향: to (~로), from (~에서), into (안으로), through (통과해)\n• 기타: by (~에 의해), with (~와 함께), for (~를 위해)\n  about (~에 관해), without (~없이)',
+        usage: '• I live in Seoul. (서울에 산다.)\n• We met at 3 o\'clock on Monday. (월요일 3시에 만났다.)\n• She walked through the park. (그녀는 공원을 관통해 걸었다.)\n• This was made by my mother. (이것은 어머니가 만드셨다.)',
+    },
+    'phrasal verb': {
+        name: '구동사',
+        description: '동사 + 부사/전치사가 결합하여 본래 동사와 다른 새로운 뜻을 갖는 표현.\n영어 일상 회화에서 매우 중요하다.',
+        formation: '• 동사 + 부사: 목적어가 대명사이면 사이에 넣음\n  turn off the light / turn it off (✓)\n  turn off it (✗)\n• 동사 + 전치사: 분리 불가\n  look after the baby (✓)\n  look the baby after (✗)\n• 동사 + 부사 + 전치사: 3단어\n  look forward to, put up with',
+        usage: '• Please turn off the TV. (TV를 꺼주세요.)\n• I look forward to your reply. (답장을 기대합니다.)\n• She gave up smoking. (그녀는 담배를 끊었다.)\n• Let\'s put off the meeting. (회의를 미루자.)',
+    },
+
+    // ── 관사 ──
+    'article': {
+        name: '관사',
+        description: '명사 앞에 놓여 "어떤 것"인지, "그 것"인지를 구별해주는 말.\na/an은 "하나의~", the는 "그~"라는 뜻이다.',
+        formation: '• a/an (부정관사): 정해지지 않은 하나의 명사\n  a book, an apple (모음 소리 앞: an)\n• the (정관사): 이미 알고 있는 특정 명사 (단수/복수 모두 가능)\n  the book, the water, the students\n• 무관사: 일반적인 이야기, 고유명사 등\n  Cats are cute. (고양이는 귀엽다 — 일반적인 이야기)',
+        usage: '• I saw a cat. The cat was black. (고양이를 보았다. 그 고양이는 검었다.)\n• She plays the piano. (그녀는 피아노를 친다.)\n• Water is essential. (물은 필수적이다.)',
+    },
+
+    // ── 접속사 ──
+    'conjunction': {
+        name: '접속사',
+        description: '단어, 구, 절을 연결하는 역할을 하는 품사.',
+        formation: '• 등위접속사: and, but, or, nor, for, so, yet\n  두 대등한 요소를 연결\n• 종속접속사: because, although, if, when, while, since, until, unless, after, before, that\n  주절에 종속절을 연결\n• 상관접속사: both A and B, either A or B, neither A nor B, not only A but also B',
+        usage: '• 등위: I like tea and coffee. (차와 커피를 좋아한다.)\n• 종속: I stayed home because it rained. (비가 와서 집에 있었다.)\n• 상관: Both he and she are students. (그와 그녀 둘 다 학생이다.)\n• Although it was late, she kept studying. (늦었지만 그녀는 계속 공부했다.)',
+    },
+
+    // ── 기타 중요 문법 ──
+    'reported speech': {
+        name: '간접 화법',
+        description: '다른 사람의 말을 전달할 때, 직접 인용 대신 자기 관점으로 바꾸어 말하는 표현.\n시제가 한 단계 과거로 바뀌는 것이 핵심이다.',
+        formation: '• 평서문: say/tell + (that) + 시제를 한 단계 과거로\n  "I am happy" → She said (that) she was happy.\n• 의문문: ask + if/whether (Yes/No) 또는 의문사 + 평서문 어순\n  "Do you like it?" → He asked if I liked it.\n• 명령문: tell/ask + 목적어 + to 부정사\n  "Sit down" → She told me to sit down.',
+        usage: '• 시제 변화: He said he was tired. (그는 피곤하다고 말했다.)\n• 의문 전달: She asked where I lived. (그녀는 내가 어디에 사는지 물었다.)\n• 명령 전달: He told me to wait. (그는 나에게 기다리라고 말했다.)',
+    },
+    'causative': {
+        name: '사역 구문',
+        description: '다른 사람에게 어떤 동작을 하게 시키거나 경험하게 되는 것을 표현.',
+        formation: '• make + 목적어 + 동사원형: (강제로) ~하게 하다\n• have + 목적어 + 동사원형: ~하게 하다 (의뢰/지시)\n• let + 목적어 + 동사원형: ~하게 허락하다\n• get + 목적어 + to부정사: (설득하여) ~하게 하다\n• have/get + 목적어 + 과거 분사: ~을 당하다/~을 시키다',
+        usage: '• She made me cry. (그녀가 나를 울게 했다.)\n• I had him fix my car. (내 차를 그에게 고치게 했다.)\n• Let me help you. (내가 도와줄게.)\n• I got my hair cut. (머리를 잘랐다 — 미용실에서.)',
+    },
+    'emphatic': {
+        name: '강조 구문',
+        description: 'do/does/did를 본동사 앞에 넣어 동작을 강조하는 구문.',
+        formation: '• do/does + 동사원형 (현재)\n  I do like it.\n• did + 동사원형 (과거)\n  She did come yesterday.',
+        usage: '• I do love this song. (나는 이 노래를 정말 좋아한다.)\n• She does work hard. (그녀는 정말 열심히 일한다.)\n• He did call you. (그가 정말 너에게 전화했어.)',
+    },
+    'cleft sentence': {
+        name: '분열문',
+        description: '문장의 특정 요소를 강조하기 위해 구조를 분리하는 문법.',
+        formation: '• It is/was ~ that/who ...\n  It was John who broke the window.\n• What ~ is/was ...\n  What I need is a vacation.',
+        usage: '• It was yesterday that we met. (우리가 만난 건 어제였다.)\n• What she said was true. (그녀가 말한 것은 사실이었다.)\n• It is the result that matters. (중요한 것은 결과다.)',
+    },
+    'inversion': {
+        name: '도치',
+        description: '주어와 동사/조동사의 어순을 바꾸어 강조하거나 형식을 갖추는 구문.',
+        formation: '• 부정 부사 도치: Never/Rarely/Seldom/Hardly/Not only + 조동사 + 주어 + 동사\n• so/neither 도치: So do I. / Neither did she.\n• 조건문 도치: Had I known = If I had known\n  Were I you = If I were you',
+        usage: '• Never have I seen such beauty. (이토록 아름다운 것을 본 적이 없다.)\n• Rarely does he make mistakes. (그는 좀처럼 실수하지 않는다.)\n• Not only did she sing, but she also danced. (그녀는 노래뿐만 아니라 춤도 췄다.)',
+    },
+};
+
+// Korean key aliases → reference to English-keyed entries above.
+// Allows lookup by Korean labels (from LLM prompt) AND legacy English labels.
+const KOREAN_TO_ENGLISH_GRAMMAR_MAP = {
+    '과거형': 'past tense', '과거 분사': 'past participle', '-ing형': '-ing form',
+    '현재 분사': '-ing form', '3인칭 단수 현재': '3rd person',
+    '비교급': 'comparative', '최상급': 'superlative', '복수형': 'plural',
+    '3인칭 단수': '3rd person', '현재 완료': 'present perfect', '과거 완료': 'past perfect',
+    '미래 완료': 'future perfect', '현재 진행형': 'present continuous', '과거 진행형': 'past continuous',
+    '수동태': 'passive voice', '가정법': 'subjunctive', '동명사': 'gerund',
+    '부정사': 'infinitive', '조건문': 'conditional', '관계절': 'relative clause',
+    '조동사': 'modal verb', '조동사 완료형': 'modal perfect',
+    '전치사': 'preposition', '구동사': 'phrasal verb', '관사': 'article',
+    '접속사': 'conjunction', '간접 화법': 'reported speech', '사역 구문': 'causative',
+    '강조 구문': 'emphatic', '분열문': 'cleft sentence', '도치': 'inversion',
+};
+(function () {
+    for (var ko in KOREAN_TO_ENGLISH_GRAMMAR_MAP) {
+        var en = KOREAN_TO_ENGLISH_GRAMMAR_MAP[ko];
+        if (!ENGLISH_GRAMMAR_EXPLANATIONS[ko] && ENGLISH_GRAMMAR_EXPLANATIONS[en]) {
+            ENGLISH_GRAMMAR_EXPLANATIONS[ko] = ENGLISH_GRAMMAR_EXPLANATIONS[en];
+        }
+    }
+})();
+
+// ── Built-in English Verb Type Explanations ───────────
+const ENGLISH_VERB_TYPE_EXPLANATIONS = {
+    'regular': {
+        name: '규칙 동사',
+        description: '과거형과 과거 분사형을 만들 때 어미에 -ed를 규칙적으로 붙이는 동사.',
+        rules: [
+            '• 기본: 동사 + -ed (walk → walked → walked)',
+            '• -e로 끝남: -d만 추가 (like → liked → liked)',
+            '• 자음+y: y → ied (study → studied → studied)',
+            '• 짧은 모음+자음 하나: 자음을 한 번 더 씀 (stop → stopped → stopped)',
+            '  ※ 2음절 이상은 강세가 끝에 올 때만 겹침 (prefer → preferred)',
+        ],
+        examples: 'walk, talk, play, study, like, love, want, need, help',
+        tip: '대부분의 영어 동사는 규칙 동사입니다. 패턴을 익히면 과거형/과거 분사를 쉽게 만들 수 있습니다.',
+    },
+    'irregular': {
+        name: '불규칙 동사',
+        description: '과거형과 과거 분사형이 -ed 규칙을 따르지 않고 개별적인 형태를 가지는 동사.\n3단 변화(원형 - 과거 - 과거분사)를 암기해야 한다.',
+        rules: [
+            '• A-B-C형: 셋 다 다름 (go → went → gone, see → saw → seen)',
+            '• A-B-B형: 과거와 과거분사 동일 (buy → bought → bought, teach → taught → taught)',
+            '• A-B-A형: 원형과 과거분사 동일 (come → came → come, run → ran → run)',
+            '• A-A-A형: 셋 다 동일 (cut → cut → cut, put → put → put)',
+        ],
+        examples: 'go/went/gone, see/saw/seen, eat/ate/eaten, take/took/taken, break/broke/broken, write/wrote/written',
+        tip: '가장 자주 쓰이는 불규칙 동사는 약 200개 정도이며, 대부분 일상 기본 어휘입니다. 패턴별로 묶어서 외우면 효율적입니다.',
+    },
+};
+
 // ── Built-in Grammar Explanations ─────────────────────
 // Maps grammar form keywords → Korean descriptions for modal display.
 // Keys use the Korean-localized labels matching LLM prompt output.
@@ -1333,11 +1586,13 @@ const VERB_GROUP_EXPLANATIONS = {
 /**
  * Show a read-only modal with verb group explanation.
  */
-function showVerbGroupInfoModal(group) {
+function showVerbGroupInfoModal(group, language) {
     var existing = document.getElementById('stv-grammar-modal-overlay');
     if (existing) existing.remove();
 
-    var info = VERB_GROUP_EXPLANATIONS[group];
+    var info = (language === 'en') ? ENGLISH_VERB_TYPE_EXPLANATIONS[group] : VERB_GROUP_EXPLANATIONS[group];
+    if (!info && language !== 'en') info = ENGLISH_VERB_TYPE_EXPLANATIONS[group];
+    if (!info && language === 'en') info = VERB_GROUP_EXPLANATIONS[group];
 
     var overlay = document.createElement('div');
     overlay.id = 'stv-grammar-modal-overlay';
@@ -1382,18 +1637,38 @@ function showVerbGroupInfoModal(group) {
 /**
  * Find the best matching grammar explanation for a label.
  * Tries exact match first, then keyword search.
+ * Checks English explanations first for English words, then Japanese.
  */
-function findGrammarExplanation(label) {
+function findGrammarExplanation(label, language) {
     if (!label) return null;
-    var normalized = label.trim();
-    // Exact match
-    if (GRAMMAR_EXPLANATIONS[normalized]) return GRAMMAR_EXPLANATIONS[normalized];
-    // Try matching by key appearing in label (e.g. "사역수동 + た형" → "사역수동")
-    var keys = Object.keys(GRAMMAR_EXPLANATIONS);
-    // Sort by key length descending for best match first
-    keys.sort(function (a, b) { return b.length - a.length; });
-    for (var i = 0; i < keys.length; i++) {
-        if (normalized.includes(keys[i])) return GRAMMAR_EXPLANATIONS[keys[i]];
+    var normalized = label.trim().toLowerCase();
+    var normalizedOriginal = label.trim();
+
+    // Determine which dictionaries to search and in what order
+    var dictionaries = (language === 'en')
+        ? [ENGLISH_GRAMMAR_EXPLANATIONS, GRAMMAR_EXPLANATIONS]
+        : [GRAMMAR_EXPLANATIONS, ENGLISH_GRAMMAR_EXPLANATIONS];
+
+    for (var d = 0; d < dictionaries.length; d++) {
+        var dict = dictionaries[d];
+        // Exact match (case-insensitive for English)
+        for (var key in dict) {
+            if (key === normalizedOriginal || key.toLowerCase() === normalized) {
+                var result = Object.assign({}, dict[key]);
+                result._matchedKey = key;
+                return result;
+            }
+        }
+        // Keyword search
+        var keys = Object.keys(dict);
+        keys.sort(function (a, b) { return b.length - a.length; });
+        for (var i = 0; i < keys.length; i++) {
+            if (normalized.includes(keys[i].toLowerCase())) {
+                var result2 = Object.assign({}, dict[keys[i]]);
+                result2._matchedKey = keys[i];
+                return result2;
+            }
+        }
     }
     return null;
 }
@@ -1401,11 +1676,11 @@ function findGrammarExplanation(label) {
 /**
  * Show a read-only modal with grammar form explanation.
  */
-function showGrammarInfoModal(grammarLabel) {
+function showGrammarInfoModal(grammarLabel, language) {
     var existing = document.getElementById('stv-grammar-modal-overlay');
     if (existing) existing.remove();
 
-    var info = findGrammarExplanation(grammarLabel);
+    var info = findGrammarExplanation(grammarLabel, language);
 
     var overlay = document.createElement('div');
     overlay.id = 'stv-grammar-modal-overlay';
@@ -1424,8 +1699,14 @@ function showGrammarInfoModal(grammarLabel) {
             + '<button class="stv-btn stv-btn-cancel" id="stv-grammar-modal-close">닫기</button>'
             + '</div></div>';
     } else {
+        // Determine display title: if badge already shows the Korean name, show English key as subtitle
+        var displayTitle = info.name;
+        if (language === 'en' && grammarLabel === info.name && KOREAN_TO_ENGLISH_GRAMMAR_MAP[grammarLabel]) {
+            var enKey = KOREAN_TO_ENGLISH_GRAMMAR_MAP[grammarLabel];
+            displayTitle = enKey.replace(/\b\w/g, function (c) { return c.toUpperCase(); });
+        }
         var bodyHtml = '<div class="stv-grammar-label-display">' + escapeHtml(grammarLabel) + '</div>'
-            + '<h4 class="stv-grammar-name">' + escapeHtml(info.name) + '</h4>';
+            + '<h4 class="stv-grammar-name">' + escapeHtml(displayTitle) + '</h4>';
         if (info.description) {
             bodyHtml += '<div class="stv-grammar-section">'
                 + '<div class="stv-grammar-section-title">설명</div>'
@@ -1551,21 +1832,23 @@ function normalizePartOfSpeech(pos) {
 /**
  * Use LLM to analyze a word — independent API, no chat lock
  */
-async function analyzeWordWithLLM(word, langOverride) {
+async function analyzeWordWithLLM(word, langOverride, contextSentence) {
     var lang = (langOverride && langOverride !== 'auto') ? langOverride : detectLanguage(word);
     var langNames = { ja: 'Japanese', ko: 'Korean', zh: 'Chinese', en: 'English', other: '', unknown: '' };
 
     var prompt = 'You are a professional linguist and language teaching expert who explains vocabulary to Korean-speaking learners at a beginner-to-intermediate level. '
         + 'Analyze the following ' + (langNames[lang] || '') + ' word and return detailed information.\n\n'
+        + (contextSentence ? 'CONTEXT SENTENCE (use this to determine the exact grammatical role of the word):\n"' + contextSentence + '"\n\n' : '')
         + 'Return ONLY a valid JSON object with these fields:\n'
         + '- "reading": pronunciation. If the word has MULTIPLE readings, separate them with ", " (e.g. "にっき, にき" for 日記). Japanese→hiragana, English→IPA, Chinese→pinyin, Korean→skip.\n'
         + '- "meaning": meaning in Korean. Use dictionary-style numbered format ONLY listing the meanings, no explanations or descriptions. Format: "1. 뜻1\n2. 뜻2\n3. 뜻3". Example for 掛ける: "1. 걸다\n2. 앉다\n3. (전화를) 걸다\n4. (시간, 돈 등을) 들이다\n5. 쓰다, 착용하다". Always use this numbered short-meaning format without verbose explanations.\n'
         + '- "partOfSpeech": MUST be EXACTLY one of these Korean values: 명사, 동사, 형용사, 부사, 접속사, 조사, 감탄사, 대명사, 전치사, 조동사, 연체사, 접미사, 접두사, 기타\n'
         + '  → For Japanese: 名詞→명사, 動詞→동사, イ形容詞/形容詞→형용사, ナ形容詞/形容動詞→형용사, 副詞→부사, 接続詞→접속사, 助詞→조사, 助動詞→조동사, 連体詞→연체사, 感動詞→감탄사\n'
         + '- "grammarInfo": If the word is a conjugated/inflected form (not dictionary form), provide a SHORT and CONCISE conjugation label. MUST be brief — max ~15 characters. Do NOT include the original word, quotes, or full grammatical breakdowns.\n'
+        + '  IMPORTANT: If a CONTEXT SENTENCE is provided above, determine the grammatical role from that sentence. For example, regular English past tense and past participle are often the same form (e.g. "walked"), but "I walked" is 과거형, while "I have walked" or "was walked" is 과거 분사. Use the context to pick the correct one. If BOTH roles apply or no context is given, list both separated by " / " (e.g. "과거형 / 과거 분사").\n'
         + '  → For Japanese: Use SHORT form names ONLY. Examples: "て형", "た형 (과거)", "ます형", "ない형 (부정)", "수동형", "사역형", "가능형", "ば형 (가정)", "의향형", "명령형", "금지형 (な)", "なら형", "미연형 + ず", "연용형". For combined: "사역수동 + た형". NEVER write full sentences like 「動詞「X」の未然形 + 助動詞「ず」」.\n'
         + '  → For Korean: e.g. "과거형", "진행형", "피동형", "사동형", "연결 -아서", "관형사형", "명사형 -기"\n'
-        + '  → For English: e.g. "past tense", "past participle", "-ing form", "comparative", "superlative", "plural", "3rd person"\n'
+        + '  → For English: e.g. "과거형", "과거 분사", "-ing형", "비교급", "최상급", "복수형", "3인칭 단수"\n'
         + '  → Empty string "" if the word is already in its dictionary/base form.\n'
         + '- "baseForm": If the word is a conjugated/inflected form, return its dictionary/base form (원형). E.g. 介さず→"介する", 食べた→"食べる", ran→"run", 먹었다→"먹다". Return null if already in base form.\n'
         + '- "examples": array of 2 objects, each with "sentence" (example sentence in original language)' + (lang === 'ko' ? '. Since this is a Korean word, do NOT include "translation" field — Korean examples need no translation.\n' : ' and "translation" (Korean translation of that sentence)\n')
@@ -1787,11 +2070,7 @@ function showBaseFormSnackbar(originalWord, baseForm) {
     snackbar.querySelector('.stv-snackbar-yes').addEventListener('click', async function () {
         dismissSnackbar();
         // Open the word dialog prefilled with the base form (no auto-analyze)
-        await showWordDialog(null, {});
-        var wordInput = document.getElementById('stv-dlg-word');
-        if (wordInput) {
-            wordInput.value = baseForm;
-        }
+        await showWordDialog(null, { initWord: baseForm });
     });
 }
 
@@ -2294,6 +2573,39 @@ function toggleVocabPanel() {
     if (vocabPanelOpen) renderVocabList();
 }
 
+// Helper: render grammar badges.
+// Derives labels from wordForms (all forms whose word matches the entry's word),
+// falling back to grammarInfo field if no wordForms or no matches.
+function renderGrammarBadges(wordEntry) {
+    var lang = wordEntry.language || 'ja';
+    var labels = [];
+
+    // If we have wordForms, find all form labels whose word matches the entry
+    if (wordEntry.wordForms && typeof wordEntry.wordForms === 'object' && wordEntry.word) {
+        var currentWord = wordEntry.word.toLowerCase();
+        Object.keys(wordEntry.wordForms).forEach(function (groupKey) {
+            var forms = wordEntry.wordForms[groupKey];
+            if (Array.isArray(forms)) {
+                forms.forEach(function (form) {
+                    if (form.word && form.label && form.word.toLowerCase() === currentWord) {
+                        labels.push(form.label);
+                    }
+                });
+            }
+        });
+    }
+
+    // Fall back to grammarInfo if no matching wordForms found
+    if (labels.length === 0 && wordEntry.grammarInfo) {
+        labels = wordEntry.grammarInfo.split(/\s*\/\s*/).map(function (g) { return g.trim(); }).filter(Boolean);
+    }
+
+    if (labels.length === 0) return '';
+    return labels.map(function (label) {
+        return '<button class="stv-grammar-badge" data-grammar="' + escapeHtml(label) + '" data-lang="' + lang + '">' + escapeHtml(label) + '</button>';
+    }).join('');
+}
+
 function renderVocabList() {
     var listEl = document.getElementById('stv-word-list');
     var countEl = document.getElementById('stv-word-count');
@@ -2346,8 +2658,8 @@ function renderVocabList() {
             + '</div></div>'
             + (w.partOfSpeech ? '<span class="stv-pos-badge">' + escapeHtml(w.partOfSpeech) + '</span>' : '')
             + '<span class="stv-lang-badge stv-lang-' + w.language + '">' + getLangLabel(w.language) + '</span>'
-            + (w.grammarInfo ? '<button class="stv-grammar-badge" data-grammar="' + escapeHtml(w.grammarInfo) + '">' + escapeHtml(w.grammarInfo) + '</button>' : '')
-            + (w.verbGroup ? '<button class="stv-verb-group-badge" data-verb-group="' + escapeHtml(w.verbGroup) + '">' + escapeHtml(w.verbGroup) + '</button>' : '')
+            + renderGrammarBadges(w)
+            + (w.verbGroup ? '<button class="stv-verb-group-badge" data-verb-group="' + escapeHtml(w.verbGroup) + '" data-lang="' + (w.language || 'ja') + '">' + escapeHtml(w.verbGroup) + '</button>' : '')
             + (w.jlptLevel ? '<span class="stv-jlpt-badge stv-jlpt-' + w.jlptLevel.toLowerCase() + '">' + escapeHtml(w.jlptLevel) + '</span>' : '')
             + (w.meaning ? '<div class="stv-word-meaning">' + formatMeaningHtml(w.meaning) + '</div>' : '')
             + (w.examples && w.examples.length > 0
@@ -2382,13 +2694,13 @@ function renderVocabList() {
     listEl.querySelectorAll('.stv-grammar-badge').forEach(function (btn) {
         btn.addEventListener('click', function (e) {
             e.stopPropagation();
-            showGrammarInfoModal(btn.getAttribute('data-grammar'));
+            showGrammarInfoModal(btn.getAttribute('data-grammar'), btn.getAttribute('data-lang'));
         });
     });
     listEl.querySelectorAll('.stv-verb-group-badge').forEach(function (btn) {
         btn.addEventListener('click', function (e) {
             e.stopPropagation();
-            showVerbGroupInfoModal(btn.getAttribute('data-verb-group'));
+            showVerbGroupInfoModal(btn.getAttribute('data-verb-group'), btn.getAttribute('data-lang'));
         });
     });
     if (multiSelectMode) {
@@ -2627,8 +2939,8 @@ function showWordInfoDialog(wordId) {
         + '<div class="stv-info-badges">'
         + (w.partOfSpeech ? '<span class="stv-pos-badge">' + escapeHtml(w.partOfSpeech) + '</span>' : '')
         + '<span class="stv-lang-badge stv-lang-' + w.language + '" style="display: flex; align-items: center; justify-content: center;">' + getLangLabel(w.language) + '</span>'
-        + (w.grammarInfo ? '<button class="stv-grammar-badge" data-grammar="' + escapeHtml(w.grammarInfo) + '">' + escapeHtml(w.grammarInfo) + '</button>' : '')
-        + (w.verbGroup ? '<button class="stv-verb-group-badge" data-verb-group="' + escapeHtml(w.verbGroup) + '">' + escapeHtml(w.verbGroup) + '</button>' : '')
+        + renderGrammarBadges(w)
+        + (w.verbGroup ? '<button class="stv-verb-group-badge" data-verb-group="' + escapeHtml(w.verbGroup) + '" data-lang="' + (w.language || 'ja') + '">' + escapeHtml(w.verbGroup) + '</button>' : '')
         + (w.jlptLevel ? '<span class="stv-jlpt-badge stv-jlpt-' + w.jlptLevel.toLowerCase() + '">' + escapeHtml(w.jlptLevel) + '</span>' : '')
         + '</div>'
         + baseFormHtml
@@ -2675,10 +2987,7 @@ function showWordInfoDialog(wordId) {
                 showWordInfoDialog(vocabItem.id);
             } else {
                 closeInfo();
-                showWordDialog(null, {}).then(function () {
-                    var wordInput = document.getElementById('stv-dlg-word');
-                    if (wordInput) wordInput.value = baseWord;
-                });
+                showWordDialog(null, { initWord: baseWord });
             }
         });
     }
@@ -2696,10 +3005,7 @@ function showWordInfoDialog(wordId) {
             } else {
                 // Not in vocab → open add dialog prefilled
                 closeInfo();
-                showWordDialog(null, {}).then(function () {
-                    var wordInput = document.getElementById('stv-dlg-word');
-                    if (wordInput) wordInput.value = formWord;
-                });
+                showWordDialog(null, { initWord: formWord });
             }
         });
     });
@@ -2708,7 +3014,7 @@ function showWordInfoDialog(wordId) {
     overlay.querySelectorAll('.stv-grammar-badge').forEach(function (btn) {
         btn.addEventListener('click', function (e) {
             e.stopPropagation();
-            showGrammarInfoModal(btn.getAttribute('data-grammar'));
+            showGrammarInfoModal(btn.getAttribute('data-grammar'), btn.getAttribute('data-lang'));
         });
     });
 
@@ -2716,7 +3022,7 @@ function showWordInfoDialog(wordId) {
     overlay.querySelectorAll('.stv-verb-group-badge').forEach(function (btn) {
         btn.addEventListener('click', function (e) {
             e.stopPropagation();
-            showVerbGroupInfoModal(btn.getAttribute('data-verb-group'));
+            showVerbGroupInfoModal(btn.getAttribute('data-verb-group'), btn.getAttribute('data-lang'));
         });
     });
 }
@@ -2788,7 +3094,7 @@ async function showWordDialog(editId, opts) {
         + '<div class="stv-field"><label>품사</label><select id="stv-dlg-pos">' + posHtml + '</select></div>'
         + '<div class="stv-field"><label>문법 정보 (활용형)</label>'
         + '<input type="text" id="stv-dlg-grammar" value="' + escapeHtml(existing ? (existing.grammarInfo || '') : '') + '" placeholder="예: 과거형, 수동형, て형 등" /></div>'
-        + '<div class="stv-field-row">'
+        + '<div class="stv-field-row" id="stv-dlg-ja-fields">'
         + '<div class="stv-field stv-field-half"><label>동사 그룹</label>'
         + '<select id="stv-dlg-verb-group"><option value="">없음</option>'
         + ['五段', '一段', 'サ変', 'カ変'].map(function (g) {
@@ -2836,15 +3142,58 @@ async function showWordDialog(editId, opts) {
         if (lastEntry) lastEntry.querySelector('.stv-dlg-example-sentence').focus();
     });
 
-    // Language change → toggle translation input visibility
-    document.getElementById('stv-dlg-lang').addEventListener('change', function () {
-        var isKo = isCurrentWordKorean();
+    // Language change → toggle translation input visibility & language-specific fields
+    function updateLangFields() {
+        var langSel = document.getElementById('stv-dlg-lang');
+        var selectedLang = langSel ? langSel.value : 'auto';
+        var effectiveLang = selectedLang;
+        if (effectiveLang === 'auto') {
+            var wordInput = document.getElementById('stv-dlg-word');
+            var wordVal = wordInput ? wordInput.value.trim() : '';
+            effectiveLang = wordVal ? detectLanguage(wordVal) : 'ja';
+        }
+
+        var isKo = (effectiveLang === 'ko');
+        var isJa = (effectiveLang === 'ja');
+
+        // Toggle translation inputs
         examplesList.querySelectorAll('.stv-dlg-example-translation').forEach(function (el) {
             el.style.display = isKo ? 'none' : '';
         });
         var ctxTrans = document.getElementById('stv-dlg-context-translation');
         if (ctxTrans) ctxTrans.style.display = isKo ? 'none' : '';
-    });
+
+        // Toggle Japanese-specific fields (동사 그룹, JLPT)
+        var jaFields = document.getElementById('stv-dlg-ja-fields');
+        if (jaFields) jaFields.style.display = isJa ? '' : 'none';
+
+        // Update reading placeholder based on language
+        var readingInput = document.getElementById('stv-dlg-reading');
+        if (readingInput) {
+            var placeholders = { ja: '히라가나', en: 'IPA (예: /wɔːk/)', ko: '', zh: '병음 (pīnyīn)', other: '발음 표기' };
+            readingInput.placeholder = placeholders[effectiveLang] || '히라가나, IPA, 병음 등';
+        }
+
+        // Update grammar info placeholder based on language
+        var grammarInput = document.getElementById('stv-dlg-grammar');
+        if (grammarInput) {
+            var grammarPlaceholders = {
+                ja: '예: 과거형, 수동형, て형 등',
+                en: '예: 과거형, 과거 분사, -ing형, 비교급 등',
+                ko: '예: 과거형, 진행형, 피동형 등',
+                zh: '예: 과거형, 진행형 등',
+                other: '활용형 정보'
+            };
+            grammarInput.placeholder = grammarPlaceholders[effectiveLang] || grammarPlaceholders.ja;
+        }
+    }
+
+    document.getElementById('stv-dlg-lang').addEventListener('change', updateLangFields);
+    // Also update when the word input changes (auto-detect language from typed word)
+    var wordInputEl = document.getElementById('stv-dlg-word');
+    if (wordInputEl) wordInputEl.addEventListener('input', updateLangFields);
+    // Run once on init to set correct state
+    updateLangFields();
 
     // Track whether AI analysis was used and detected base form
     var detectedBaseForm = null;
@@ -2895,8 +3244,10 @@ async function showWordDialog(editId, opts) {
         var selectedLang = langSel ? langSel.value : 'auto';
         try {
             // Run word analysis and base form detection in parallel
+            var ctxEl = document.getElementById('stv-dlg-context-sentence');
+            var curCtx = ctxEl ? ctxEl.value.trim() : contextSentence;
             var [result, baseForm] = await Promise.all([
-                analyzeWordWithLLM(wordVal, selectedLang),
+                analyzeWordWithLLM(wordVal, selectedLang, curCtx),
                 detectBaseForm(wordVal, selectedLang),
             ]);
             if (result) {
@@ -3341,11 +3692,7 @@ function setupTextSelection() {
                 ev.stopPropagation();
                 removeTooltip();
                 if (window.getSelection()) window.getSelection().removeAllRanges();
-                await showWordDialog(null, { contextSentence: capturedSentence });
-                var wordInput = document.getElementById('stv-dlg-word');
-                if (wordInput) {
-                    wordInput.value = capturedWord;
-                }
+                await showWordDialog(null, { initWord: capturedWord, contextSentence: capturedSentence });
             });
 
             // Furigana add button
@@ -3959,7 +4306,7 @@ function showSettingsModal() {
         ],
         google: [
             // Gemini 3.x
-            'gemini-3.1-pro-preview',
+            'gemini-3.1-pro-preview', 'gemini-3.1-flash-lite-preview',
             'gemini-3-pro-preview', 'gemini-3-pro-image-preview', 'gemini-3-flash-preview',
             // Gemini 2.5
             'gemini-2.5-pro', 'gemini-2.5-pro-preview-06-05', 'gemini-2.5-pro-preview-05-06', 'gemini-2.5-pro-preview-03-25',
@@ -4073,7 +4420,8 @@ function showSettingsModal() {
         ],
         vertexai: [
             // Gemini 3.x
-            'gemini-3.1-pro-preview', 'gemini-3-pro-preview', 'gemini-3-pro-image-preview', 'gemini-3-flash-preview',
+            'gemini-3.1-pro-preview', 'gemini-3.1-flash-lite-preview',
+            'gemini-3-pro-preview', 'gemini-3-pro-image-preview', 'gemini-3-flash-preview',
             // Gemini 2.5
             'gemini-2.5-pro', 'gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemini-2.5-flash-image', 'gemini-2.5-flash-image-preview',
             // Gemini 2.0

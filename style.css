@@ -144,6 +144,7 @@
     border-bottom: 2px solid var(--stv-vocab-border, rgba(100, 149, 237, 0.5)) !important;
     cursor: pointer !important;
     transition: background 0.15s, color 0.15s !important;
+    font-size: inherit !important;
 }
 
 #chat .mes .mes_text .stv-vocab-hl-span.stv-vocab-highlight:hover {
@@ -173,6 +174,7 @@
 /* Prevent furigana from adding extra spacing between words */
 #chat .mes .mes_text .stv-furigana-wrapper {
     display: inline !important;
+    font-size: inherit !important;
     word-spacing: 0 !important;
     letter-spacing: normal !important;
 }
@@ -217,7 +219,7 @@
 .stv-panel {
     position: fixed;
     top: 0;
-    right: -380px;
+    right: 0;
     width: 370px;
     height: 100vh;
     height: 100dvh;
@@ -226,13 +228,18 @@
     z-index: 10000;
     display: flex;
     flex-direction: column;
-    transition: right 0.3s ease;
+    -webkit-transform: translateX(100%);
+    transform: translateX(100%);
+    -webkit-transition: -webkit-transform 0.3s ease;
+    transition: transform 0.3s ease;
+    will-change: transform;
     box-shadow: -4px 0 20px rgba(0, 0, 0, 0.3);
     font-family: var(--mainFontFamily, sans-serif);
 }
 
 .stv-panel-open {
-    right: 0;
+    -webkit-transform: translateX(0);
+    transform: translateX(0);
 }
 
 .stv-backdrop {
@@ -2379,11 +2386,6 @@
     /* Panel: full-width on mobile */
     .stv-panel {
         width: 100vw;
-        right: -100vw;
-    }
-
-    .stv-panel-open {
-        right: 0;
     }
 
     /* Backdrop visible on mobile when panel open */
@@ -2391,7 +2393,10 @@
     .stv-backdrop.stv-backdrop-show {
         display: block;
         position: fixed;
-        inset: 0;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
         background: rgba(0, 0, 0, 0.4);
         z-index: 9999;
     }
