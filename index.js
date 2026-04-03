@@ -91,6 +91,7 @@ const defaultSettings = Object.freeze({
     furiganaHover: false,
     showKatakanaFurigana: false,
     furiganaEditOnClick: true,
+    tooltipPosition: 'above',
     theme: 'auto',
     // API
     provider: 'openai',
@@ -3664,7 +3665,12 @@ function setupTextSelection() {
             var capturedWord = getCleanSelectedText(selection) || selectedText;
             var capturedSentence = extractSentenceFromSelection(selection);
 
-            selectionTooltip.style.top = (rect.top + window.scrollY - 40) + 'px';
+            var posAbove = (getSettings().tooltipPosition || 'above') === 'above';
+            if (posAbove) {
+                selectionTooltip.style.top = (rect.top + window.scrollY - 40) + 'px';
+            } else {
+                selectionTooltip.style.top = (rect.bottom + window.scrollY + 4) + 'px';
+            }
             // left will be set after measuring width in rAF
             document.body.appendChild(selectionTooltip);
 
@@ -3683,10 +3689,13 @@ function setupTextSelection() {
                 }
                 selectionTooltip.style.left = left + 'px';
 
-                // Top edge overflow → show below selection instead
+                // Overflow fallback: if above and clipped at top → show below
+                // if below and clipped at bottom → show above
                 var tr = selectionTooltip.getBoundingClientRect();
-                if (tr.top < 4) {
+                if (posAbove && tr.top < 4) {
                     selectionTooltip.style.top = (rect.bottom + window.scrollY + 4) + 'px';
+                } else if (!posAbove && tr.bottom > window.innerHeight - 4) {
+                    selectionTooltip.style.top = (rect.top + window.scrollY - 40) + 'px';
                 }
             });
 
@@ -3780,7 +3789,37 @@ function setupTextSelection() {
         if (selectionTooltip && !selectionTooltip.contains(e.target)) removeTooltip();
     });
     var chatScroll = document.getElementById('chat');
-    if (chatScroll) chatScroll.addEventListener('scroll', function () { removeTooltip(); });
+    if (chatScroll) {
+        var tooltipScrollY = 0;
+        var _removeTooltipOrig = removeTooltip;
+        removeTooltip = function () {
+            _removeTooltipOrig();
+            tooltipScrollY = 0;
+        };
+        chatScroll.addEventListener('scroll', function () {
+            if (!selectionTooltip) return;
+            // On first scroll after tooltip, record baseline
+            if (!tooltipScrollY) { tooltipScrollY = chatScroll.scrollTop; return; }
+            var delta = Math.abs(chatScroll.scrollTop - tooltipScrollY);
+            if (delta > 30) {
+                // Real scroll — remove tooltip
+                removeTooltip();
+            } else {
+                // Minor layout shift — reposition tooltip to follow selection
+                var sel = window.getSelection();
+                if (!sel || sel.rangeCount === 0 || !sel.toString().trim()) { removeTooltip(); return; }
+                var range = sel.getRangeAt(0);
+                var rect = range.getBoundingClientRect();
+                var posAbove = (getSettings().tooltipPosition || 'above') === 'above';
+                if (posAbove) {
+                    selectionTooltip.style.top = (rect.top + window.scrollY - 40) + 'px';
+                } else {
+                    selectionTooltip.style.top = (rect.bottom + window.scrollY + 4) + 'px';
+                }
+                tooltipScrollY = chatScroll.scrollTop;
+            }
+        });
+    }
 }
 
 // ── Per-message furigana button (.extraMesButtons) ────
@@ -4497,6 +4536,11 @@ function showSettingsModal() {
         + '<input type="checkbox" id="stv-set-katakana-furigana"' + (s.showKatakanaFurigana ? ' checked' : '') + ' /></div>'
         + '<div class="stv-setting-row"><label>클릭 시 후리가나 수정</label>'
         + '<input type="checkbox" id="stv-set-furigana-edit-click"' + (s.furiganaEditOnClick ? ' checked' : '') + ' /></div>'
+        + '<div class="stv-setting-row"><label>드래그 툴팁 위치</label>'
+        + '<select id="stv-set-tooltip-position" class="stv-setting-select">'
+        + '<option value="above"' + ((s.tooltipPosition || 'above') === 'above' ? ' selected' : '') + '>위</option>'
+        + '<option value="below"' + (s.tooltipPosition === 'below' ? ' selected' : '') + '>아래</option>'
+        + '</select></div>'
         + '<div class="stv-setting-row stv-setting-buttons">'
         + '<button id="stv-set-remove-all" class="stv-btn stv-btn-cancel" style="width:100%;justify-content:center;">'
         + '<span class="fa-solid fa-eraser"></span> 후리가나 전체 삭제</button></div></div>'
@@ -4657,6 +4701,7 @@ function showSettingsModal() {
         settings.showOnBotMsg = document.getElementById('stv-set-bot').checked;
         settings.showKatakanaFurigana = document.getElementById('stv-set-katakana-furigana').checked;
         settings.furiganaEditOnClick = document.getElementById('stv-set-furigana-edit-click').checked;
+        settings.tooltipPosition = document.getElementById('stv-set-tooltip-position').value || 'above';
         settings.furiganaSize = parseFloat(document.getElementById('stv-set-furigana-size').value) || 0.55;
         settings.furiganaColor = document.getElementById('stv-set-furigana-color').value || '#888888';
         settings.furiganaOpacity = parseFloat(document.getElementById('stv-set-furigana-opacity').value) || 0.9;
