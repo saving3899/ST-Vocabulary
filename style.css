@@ -328,16 +328,19 @@
     flex-direction: column;
     -webkit-transform: translateX(100%);
     transform: translateX(100%);
-    -webkit-transition: -webkit-transform 0.3s ease;
-    transition: transform 0.3s ease;
+    -webkit-transition: -webkit-transform 0.3s ease, visibility 0s 0.3s;
+    transition: transform 0.3s ease, visibility 0s 0.3s;
     will-change: transform;
-    box-shadow: -4px 0 20px rgba(0, 0, 0, 0.3);
+    visibility: hidden;
     font-family: var(--mainFontFamily, sans-serif);
 }
 
 .stv-panel-open {
     -webkit-transform: translateX(0);
     transform: translateX(0);
+    visibility: visible;
+    -webkit-transition: -webkit-transform 0.3s ease, visibility 0s 0s;
+    transition: transform 0.3s ease, visibility 0s 0s;
 }
 
 .stv-backdrop {
